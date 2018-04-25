@@ -24,6 +24,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -54,7 +55,6 @@ import com.github.pires.obd.reader.net.ObdReading;
 import com.github.pires.obd.reader.net.ObdService;
 import com.github.pires.obd.reader.trips.TripLog;
 import com.github.pires.obd.reader.trips.TripRecord;
-import com.google.inject.Inject;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -67,18 +67,20 @@ import java.util.Map;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import roboguice.RoboGuice;
-import roboguice.activity.RoboActivity;
-import roboguice.inject.ContentView;
-import roboguice.inject.InjectView;
 
 import static com.github.pires.obd.reader.activity.ConfigActivity.getGpsDistanceUpdatePeriod;
 import static com.github.pires.obd.reader.activity.ConfigActivity.getGpsUpdatePeriod;
 
+//import com.google.inject.Inject;
+/*import roboguice.RoboGuice;
+import roboguice.activity.RoboActivity;
+import roboguice.inject.ContentView;
+import roboguice.inject.InjectView;*/
+
 // Some code taken from https://github.com/barbeau/gpstest
 
-@ContentView(R.layout.main)
-public class MainActivity extends RoboActivity implements ObdProgressListener, LocationListener, GpsStatus.Listener {
+//@ContentView(R.layout.main)
+public class MainActivity extends Activity implements ObdProgressListener, LocationListener, GpsStatus.Listener {
 
     private static final String TAG = MainActivity.class.getName();
     private static final int NO_BLUETOOTH_ID = 0;
@@ -95,9 +97,9 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     private static final int REQUEST_ENABLE_BT = 1234;
     private static boolean bluetoothDefaultIsEnable = false;
 
-    static {
+/*    static {
         RoboGuice.setUseAnnotationDatabases(false);
-    }
+    }*/
 
     public Map<String, String> commandResult = new HashMap<String, String>();
     boolean mGpsIsStarted = false;
@@ -109,7 +111,7 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     private TripLog triplog;
     private TripRecord currentTrip;
 
-    @InjectView(R.id.compass_text)
+    //@InjectView(R.id.compass_text)
     private TextView compass;
     private final SensorEventListener orientListener = new SensorEventListener() {
 
@@ -140,22 +142,31 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
             // do nothing
         }
     };
-    @InjectView(R.id.BT_STATUS)
+
+    //@InjectView(R.id.BT_STATUS)
     private TextView btStatusTextView;
-    @InjectView(R.id.OBD_STATUS)
+
+    //@InjectView(R.id.OBD_STATUS)
     private TextView obdStatusTextView;
-    @InjectView(R.id.GPS_POS)
+
+    //@InjectView(R.id.GPS_POS)
     private TextView gpsStatusTextView;
-    @InjectView(R.id.vehicle_view)
+
+    //@InjectView(R.id.vehicle_view)
     private LinearLayout vv;
-    @InjectView(R.id.data_table)
+
+    //@InjectView(R.id.data_table)
     private TableLayout tl;
-    @Inject
+
+    //@Inject
     private SensorManager sensorManager;
-    @Inject
+
+    //@Inject
     private PowerManager powerManager;
-    @Inject
+
+    //@Inject
     private SharedPreferences prefs;
+
     private boolean isServiceBound;
     private AbstractGatewayService service;
     private final Runnable mQueueCommands = new Runnable() {
@@ -322,6 +333,25 @@ public class MainActivity extends RoboActivity implements ObdProgressListener, L
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.main);
+
+        // -------------------------------------------------------------------
+
+        compass = (TextView) findViewById(R.id.compass_text);
+
+        btStatusTextView = (TextView) findViewById(R.id.BT_STATUS);
+        obdStatusTextView = (TextView) findViewById(R.id.OBD_STATUS);
+        gpsStatusTextView = (TextView) findViewById(R.id.GPS_POS);
+
+        vv = (LinearLayout) findViewById(R.id.vehicle_view);
+        tl = (TableLayout) findViewById(R.id.data_table);
+
+        sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        // -------------------------------------------------------------------
 
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         if (btAdapter != null)

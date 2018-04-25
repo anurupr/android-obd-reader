@@ -3,29 +3,37 @@ package com.github.pires.obd.reader.io;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Binder;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.github.pires.obd.reader.activity.MainActivity;
-import com.google.inject.Inject;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import roboguice.service.RoboService;
+//import com.google.inject.Inject;
+
+//import roboguice.service.RoboService;
 
 
-public abstract class AbstractGatewayService extends RoboService {
+public abstract class AbstractGatewayService extends Service {
     public static final int NOTIFICATION_ID = 1;
     private static final String TAG = AbstractGatewayService.class.getName();
     private final IBinder binder = new AbstractGatewayServiceBinder();
-    @Inject
+
+    protected SharedPreferences prefs;
+
+    //@Inject
     protected NotificationManager notificationManager;
+
     protected Context ctx;
     protected boolean isRunning = false;
     protected Long queueCounter = 0L;
@@ -50,6 +58,12 @@ public abstract class AbstractGatewayService extends RoboService {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+
+        notificationManager =
+                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
         Log.d(TAG, "Creating service..");
         t.start();
         Log.d(TAG, "Service created.");

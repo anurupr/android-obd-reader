@@ -34,14 +34,15 @@ import com.github.pires.obd.exceptions.NoDataException;
 import com.github.pires.obd.exceptions.UnableToConnectException;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.io.BluetoothManager;
-import com.google.inject.Inject;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
+
+//import com.google.inject.Inject;
+//import java.lang.reflect.Method;
+//import java.util.UUID;
 
 public class TroubleCodesActivity extends Activity {
 
@@ -57,8 +58,10 @@ public class TroubleCodesActivity extends Activity {
     private static final int OBD_COMMAND_FAILURE_IE = 13;
     private static final int OBD_COMMAND_FAILURE_MIS = 14;
     private static final int OBD_COMMAND_FAILURE_NODATA = 15;
-    @Inject
+
+    //@Inject
     SharedPreferences prefs;
+
     private ProgressDialog progressDialog;
     private String remoteDevice;
     private GetTroubleCodesTask gtct;
@@ -120,7 +123,7 @@ public class TroubleCodesActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
             setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
@@ -215,7 +218,7 @@ public class TroubleCodesActivity extends Activity {
         //TODO replace below codes (res) with aboce dtcVals
         //String tmpVal = dtcVals.get(res.split("\n"));
         //String[] dtcCodes = new String[]{};
-        ArrayList<String> dtcCodes = new ArrayList<String>();
+        ArrayList<String> dtcCodes = new ArrayList<>();
         //int i =1;
         if (res != null) {
             for (String dtcCode : res.split("\n")) {
@@ -225,7 +228,7 @@ public class TroubleCodesActivity extends Activity {
         } else {
             dtcCodes.add("There are no errors");
         }
-        ArrayAdapter<String> myarrayAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, dtcCodes);
+        ArrayAdapter<String> myarrayAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, dtcCodes);
         lv.setAdapter(myarrayAdapter);
         lv.setTextFilterEnabled(true);
     }

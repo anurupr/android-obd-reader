@@ -1,5 +1,6 @@
 package com.github.pires.obd.reader.activity;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.view.ContextMenu;
@@ -16,17 +17,15 @@ import com.github.pires.obd.reader.trips.TripRecord;
 
 import java.util.List;
 
-import roboguice.activity.RoboActivity;
-
 import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
+
+//import roboguice.activity.RoboActivity;
 
 /**
  * Some code taken from https://github.com/wdkapps/FillUp
  */
 
-public class TripListActivity
-        extends RoboActivity
-        implements ConfirmDialog.Listener {
+public class TripListActivity extends Activity implements ConfirmDialog.Listener {
 
     private List<TripRecord> records;
     private TripLog triplog = null;
