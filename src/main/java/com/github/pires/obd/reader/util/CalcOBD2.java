@@ -3,14 +3,14 @@ package com.github.pires.obd.reader.util;
 
 public class CalcOBD2 {
 
-    private final int SECONDS_HOUR = 3600;
+    //private final int SECONDS_HOUR = 3600;
 
     public CalcOBD2() {
 
     }
 
-    public double getFuelConsumption(Fuel fuel, double massAirFlow, int vehicleSpeed) {
-        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (SECONDS_HOUR * massAirFlow);
+    public static double getFuelConsumption(Fuel fuel, double massAirFlow, int vehicleSpeed) {
+        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (3600 * massAirFlow);
         // measured in km/l
     }
 

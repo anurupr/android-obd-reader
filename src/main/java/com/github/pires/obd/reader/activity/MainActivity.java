@@ -59,9 +59,11 @@ import com.github.pires.obd.reader.net.ObdReading;
 import com.github.pires.obd.reader.net.ObdService;
 import com.github.pires.obd.reader.trips.TripLog;
 import com.github.pires.obd.reader.trips.TripRecord;
+import com.github.pires.obd.reader.util.CalcOBD2;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
@@ -102,12 +104,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int REQUEST_PERMISSIONS = 451;
     public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
-
     /*    static {
             RoboGuice.setUseAnnotationDatabases(false);
         }*/
     public Map<String, String> commandResult = new HashMap<>();
     boolean mGpsIsStarted = false;
+    private int paramSpeed = 0;
+    private double paramMaf = 0.0;
+    private double consumptionResult = 0.0;
     private LocationManager mLocService;
     private LocationProvider mLocProvider;
     private LogCSVWriter myCSVWriter;
@@ -294,11 +298,16 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 obdStatusTextView.setText(getString(R.string.status_obd_data));
         }
 
-        Log.e("CMD_ID", "@: " + cmdID);
-
-
         if (cmdID != null && cmdName != null && cmdResult != null) {
             if (!cmdID.equals("") && !cmdName.equals("") && !cmdResult.equals("")) {
+
+                Log.e("CMD_ID", "@" + cmdID);
+                Log.e("CMD_NAME", "@" + cmdName);
+                Log.e("CMD_RESULT", "@" + cmdResult);
+
+                Log.e("***************", "***************");
+
+                setConsumptionParams(cmdID, cmdResult);
 
                 if (vv.findViewWithTag(cmdID) != null) {
                     TextView existingTV = vv.findViewWithTag(cmdID);
@@ -312,6 +321,33 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             }
         }
     }
+
+    private void setConsumptionParams(String cmdID, String cmdResult) {
+        if (cmdID.equals("MAF")) {
+            cmdResult = cmdResult.substring(0, cmdResult.length() - 3);
+            Log.e("massAirFlow", "@" + cmdResult);
+            paramMaf = Double.parseDouble(cmdResult.replace(",", "."));
+        } else if (cmdID.equals("SPEED")) {
+            cmdResult = cmdResult.substring(0, cmdResult.length() - 4);
+            Log.e("speedVehicle", "@" + cmdResult);
+
+            DecimalFormat decim = new DecimalFormat("0.00");
+            paramSpeed = Integer.parseInt(cmdResult);
+        }
+
+        calcConsumption(CalcOBD2.Fuel.E27);
+    }
+
+    private void calcConsumption(CalcOBD2.Fuel fuel) {
+        consumptionResult = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
+
+        String result = consumptionResult + "";
+        Log.e("CONSUMPTION", "@" + result);
+
+        TextView existingTV = vv.findViewWithTag("CONSUMPTION");
+        existingTV.setText(result);
+    }
+
 
     @SuppressLint("MissingPermission")
     private void gpsInit() {
