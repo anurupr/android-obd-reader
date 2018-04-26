@@ -83,59 +83,66 @@ public class ObdGatewayService extends AbstractGatewayService {
     }
 
     public void startService() throws IOException {
-        Log.d(TAG, "Starting service..");
 
-        // get the remote Bluetooth device
-        final String remoteDevice = prefs.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
-        if (remoteDevice == null || "".equals(remoteDevice)) {
-            Toast.makeText(ctx, getString(R.string.text_bluetooth_nodevice), Toast.LENGTH_LONG).show();
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "Starting service..");
 
-            // log error
-            Log.e(TAG, "No Bluetooth device has been selected.");
+                // get the remote Bluetooth device
+                final String remoteDevice = prefs.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
+                if (remoteDevice == null || "".equals(remoteDevice)) {
+                    Toast.makeText(ctx, getString(R.string.text_bluetooth_nodevice), Toast.LENGTH_LONG).show();
 
-            // TODO kill this service gracefully
-            stopService();
-            throw new IOException();
-        } else {
+                    // log error
+                    Log.e(TAG, "No Bluetooth device has been selected.");
 
-            final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-            dev = btAdapter.getRemoteDevice(remoteDevice);
+                    // TODO kill this service gracefully
+                    stopService();
+                    //throw new IOException();
+                } else {
+
+                    final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+                    dev = btAdapter.getRemoteDevice(remoteDevice);
 
 
-    /*
-     * Establish Bluetooth connection
-     *
-     * Because discovery is a heavyweight procedure for the Bluetooth adapter,
-     * this method should always be called before attempting to connect to a
-     * remote device with connect(). Discovery is not managed by the Activity,
-     * but is run as a system service, so an application should always call
-     * cancel discovery even if it did not directly request a discovery, just to
-     * be sure. If Bluetooth state is not STATE_ON, this API will return false.
-     *
-     * see
-     * http://developer.android.com/reference/android/bluetooth/BluetoothAdapter
-     * .html#cancelDiscovery()
-     */
-            Log.d(TAG, "Stopping Bluetooth discovery.");
-            btAdapter.cancelDiscovery();
+                    /*
+                     * Establish Bluetooth connection
+                     *
+                     * Because discovery is a heavyweight procedure for the Bluetooth adapter,
+                     * this method should always be called before attempting to connect to a
+                     * remote device with connect(). Discovery is not managed by the Activity,
+                     * but is run as a system service, so an application should always call
+                     * cancel discovery even if it did not directly request a discovery, just to
+                     * be sure. If Bluetooth state is not STATE_ON, this API will return false.
+                     *
+                     * see
+                     * http://developer.android.com/reference/android/bluetooth/BluetoothAdapter
+                     * .html#cancelDiscovery()
+                     */
 
-            showNotification(getString(R.string.notification_action), getString(R.string.service_starting), R.drawable.ic_btcar, true, true, false);
+                    Log.d(TAG, "Stopping Bluetooth discovery.");
+                    btAdapter.cancelDiscovery();
 
-            try {
-                startObdConnection();
-            } catch (Exception e) {
-                Log.e(
-                        TAG,
-                        "There was an error while establishing connection. -> "
-                                + e.getMessage()
-                );
+                    showNotification(getString(R.string.notification_action), getString(R.string.service_starting), R.drawable.ic_btcar, true, true, false);
 
-                // in case of failure, stop this service.
-                stopService();
-                throw new IOException();
+                    try {
+                        startObdConnection();
+                    } catch (Exception e) {
+                        Log.e(
+                                TAG,
+                                "There was an error while establishing connection. -> "
+                                        + e.getMessage()
+                        );
+
+                        // in case of failure, stop this service.
+                        stopService();
+                        //throw new IOException();
+                    }
+                    showNotification(getString(R.string.notification_action), getString(R.string.service_started), R.drawable.ic_btcar, true, true, false);
+                }
             }
-            showNotification(getString(R.string.notification_action), getString(R.string.service_started), R.drawable.ic_btcar, true, true, false);
-        }
+        }).start();
     }
 
     /**
@@ -161,7 +168,11 @@ public class ObdGatewayService extends AbstractGatewayService {
         queueJob(new ObdCommandJob(new ObdResetCommand()));
 
         //Below is to give the adapter enough time to reset before sending the commands, otherwise the first startup commands could be ignored.
-        try { Thread.sleep(500); } catch (InterruptedException e) { e.printStackTrace(); }
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         queueJob(new ObdCommandJob(new EchoOffCommand()));
 

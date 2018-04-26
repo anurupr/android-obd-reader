@@ -296,12 +296,21 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         Log.e("CMD_ID", "@: " + cmdID);
 
-        if (vv.findViewWithTag(cmdID) != null) {
-            TextView existingTV = vv.findViewWithTag(cmdID);
-            existingTV.setText(cmdResult);
-        } else addTableRow(cmdID, cmdName, cmdResult);
-        commandResult.put(cmdID, cmdResult);
-        updateTripStatistic(job, cmdID);
+
+        if (cmdID != null && cmdName != null && cmdResult != null) {
+            if (!cmdID.equals("") && !cmdName.equals("") && !cmdResult.equals("")) {
+
+                if (vv.findViewWithTag(cmdID) != null) {
+                    TextView existingTV = vv.findViewWithTag(cmdID);
+                    existingTV.setText(cmdResult);
+                } else addTableRow(cmdID, cmdName, cmdResult);
+
+
+                commandResult.put(cmdID, cmdResult);
+                updateTripStatistic(job, cmdID);
+
+            }
+        }
     }
 
     @SuppressLint("MissingPermission")
