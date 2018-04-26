@@ -428,6 +428,28 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     }
 
     @Override
+    protected void onStop() {
+        super.onStop();
+
+        if (mLocService != null) {
+            mLocService.removeGpsStatusListener(this);
+            mLocService.removeUpdates(this);
+        }
+
+        releaseWakeLockIfHeld();
+        if (isServiceBound) {
+            doUnbindService();
+        }
+
+        endTrip();
+
+        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
+            btAdapter.disable();
+    }
+
+
+/*    @Override
     protected void onDestroy() {
         super.onDestroy();
 
@@ -446,7 +468,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
         if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
             btAdapter.disable();
-    }
+    }*/
 
     @Override
     protected void onPause() {
@@ -654,18 +676,21 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     public boolean onPrepareOptionsMenu(Menu menu) {
         MenuItem startItem = menu.findItem(START_LIVE_DATA);
         MenuItem stopItem = menu.findItem(STOP_LIVE_DATA);
+        MenuItem TripsListItem = menu.findItem(TRIPS_LIST);
         MenuItem settingsItem = menu.findItem(SETTINGS);
         MenuItem getDTCItem = menu.findItem(GET_DTC);
 
         if (service != null && service.isRunning()) {
-            getDTCItem.setEnabled(false);
             startItem.setEnabled(false);
             stopItem.setEnabled(true);
+            getDTCItem.setEnabled(false);
+            TripsListItem.setEnabled(false);
             settingsItem.setEnabled(false);
         } else {
-            getDTCItem.setEnabled(true);
             stopItem.setEnabled(false);
             startItem.setEnabled(true);
+            getDTCItem.setEnabled(true);
+            TripsListItem.setEnabled(true);
             settingsItem.setEnabled(true);
         }
 
