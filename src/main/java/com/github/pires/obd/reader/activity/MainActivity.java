@@ -294,6 +294,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 obdStatusTextView.setText(getString(R.string.status_obd_data));
         }
 
+        Log.e("CMD_ID", "@: " + cmdID);
+
         if (vv.findViewWithTag(cmdID) != null) {
             TextView existingTV = vv.findViewWithTag(cmdID);
             existingTV.setText(cmdResult);

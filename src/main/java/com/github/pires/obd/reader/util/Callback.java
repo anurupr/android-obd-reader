@@ -1,4 +1,4 @@
-package com.github.pires.obd.reader.io;
+package com.github.pires.obd.reader.util;
 
 public interface Callback {
 
