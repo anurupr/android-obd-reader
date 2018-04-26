@@ -1,5 +1,7 @@
 package com.github.pires.obd.reader.activity;
 
+import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -10,6 +12,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -25,6 +28,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.Menu;
@@ -95,13 +99,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int TRIPS_LIST = 10;
     private static final int SAVE_TRIP_NOT_AVAILABLE = 11;
     private static final int REQUEST_ENABLE_BT = 1234;
+    private static final int REQUEST_PERMISSIONS = 451;
+    public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
 
-/*    static {
-        RoboGuice.setUseAnnotationDatabases(false);
-    }*/
-
-    public Map<String, String> commandResult = new HashMap<String, String>();
+    /*    static {
+            RoboGuice.setUseAnnotationDatabases(false);
+        }*/
+    public Map<String, String> commandResult = new HashMap<>();
     boolean mGpsIsStarted = false;
     private LocationManager mLocService;
     private LocationProvider mLocProvider;
@@ -184,18 +189,20 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     alt = mLastLocation.getAltitude();
 
                     StringBuilder sb = new StringBuilder();
+
                     sb.append("Lat: ");
                     sb.append(String.valueOf(mLastLocation.getLatitude()).substring(0, posLen));
                     sb.append(" Lon: ");
                     sb.append(String.valueOf(mLastLocation.getLongitude()).substring(0, posLen));
                     sb.append(" Alt: ");
                     sb.append(String.valueOf(mLastLocation.getAltitude()));
+
                     gpsStatusTextView.setText(sb.toString());
                 }
                 if (prefs.getBoolean(ConfigActivity.UPLOAD_DATA_KEY, false)) {
                     // Upload the current reading by http
                     final String vin = prefs.getString(ConfigActivity.VEHICLE_ID_KEY, "UNDEFINED_VIN");
-                    Map<String, String> temp = new HashMap<String, String>();
+                    Map<String, String> temp = new HashMap<>();
                     temp.putAll(commandResult);
                     ObdReading reading = new ObdReading(lat, lon, alt, System.currentTimeMillis(), vin, temp);
                     new UploadAsyncTask().execute(reading);
@@ -203,10 +210,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 } else if (prefs.getBoolean(ConfigActivity.ENABLE_FULL_LOGGING_KEY, false)) {
                     // Write the current reading to CSV
                     final String vin = prefs.getString(ConfigActivity.VEHICLE_ID_KEY, "UNDEFINED_VIN");
-                    Map<String, String> temp = new HashMap<String, String>();
+                    Map<String, String> temp = new HashMap<>();
                     temp.putAll(commandResult);
                     ObdReading reading = new ObdReading(lat, lon, alt, System.currentTimeMillis(), vin, temp);
-                    if(reading != null) myCSVWriter.writeLineCSV(reading);
+                    if (reading != null) myCSVWriter.writeLineCSV(reading);
                 }
                 commandResult.clear();
             }
@@ -283,35 +290,39 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             cmdResult = getString(R.string.status_obd_no_support);
         } else {
             cmdResult = job.getCommand().getFormattedResult();
-            if(isServiceBound)
+            if (isServiceBound)
                 obdStatusTextView.setText(getString(R.string.status_obd_data));
         }
 
         if (vv.findViewWithTag(cmdID) != null) {
-            TextView existingTV = (TextView) vv.findViewWithTag(cmdID);
+            TextView existingTV = vv.findViewWithTag(cmdID);
             existingTV.setText(cmdResult);
         } else addTableRow(cmdID, cmdName, cmdResult);
         commandResult.put(cmdID, cmdResult);
         updateTripStatistic(job, cmdID);
     }
 
-    private boolean gpsInit() {
-        mLocService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (mLocService != null) {
-            mLocProvider = mLocService.getProvider(LocationManager.GPS_PROVIDER);
-            if (mLocProvider != null) {
-                mLocService.addGpsStatusListener(this);
-                if (mLocService.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    gpsStatusTextView.setText(getString(R.string.status_gps_ready));
-                    return true;
+    @SuppressLint("MissingPermission")
+    private void gpsInit() {
+
+        if (hasPermissionGps) {
+            mLocService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (mLocService != null) {
+                mLocProvider = mLocService.getProvider(LocationManager.GPS_PROVIDER);
+                if (mLocProvider != null) {
+                    mLocService.addGpsStatusListener(this);
+                    if (mLocService.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
+                        gpsStatusTextView.setText(getString(R.string.status_gps_ready));
+                        return;
+                    }
                 }
             }
         }
+
         gpsStatusTextView.setText(getString(R.string.status_gps_no_support));
         showDialog(NO_GPS_SUPPORT);
         Log.e(TAG, "Unable to get GPS PROVIDER");
         // todo disable gps controls into Preferences
-        return false;
     }
 
     private void updateTripStatistic(final ObdCommandJob job, final String cmdID) {
@@ -337,14 +348,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         // -------------------------------------------------------------------
 
-        compass = (TextView) findViewById(R.id.compass_text);
+        compass = findViewById(R.id.compass_text);
 
-        btStatusTextView = (TextView) findViewById(R.id.BT_STATUS);
-        obdStatusTextView = (TextView) findViewById(R.id.OBD_STATUS);
-        gpsStatusTextView = (TextView) findViewById(R.id.GPS_POS);
+        btStatusTextView = findViewById(R.id.BT_STATUS);
+        obdStatusTextView = findViewById(R.id.OBD_STATUS);
+        gpsStatusTextView = findViewById(R.id.GPS_POS);
 
-        vv = (LinearLayout) findViewById(R.id.vehicle_view);
-        tl = (TableLayout) findViewById(R.id.data_table);
+        vv = findViewById(R.id.vehicle_view);
+        tl = findViewById(R.id.data_table);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         powerManager = (PowerManager) getSystemService(Context.POWER_SERVICE);
@@ -366,14 +377,54 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         // create a log instance for use by this application
         triplog = TripLog.getInstance(this.getApplicationContext());
-        
+
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
+
+
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         Log.d(TAG, "Entered onStart...");
+        Log.d(TAG, "Verify permissions...");
+
+        if (android.os.Build.VERSION.SDK_INT > 23) {
+            if (hasPermissions(REQUEST_PERMISSIONS, this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                hasPermissionGps = true;
+                gpsInit();
+            }
+        } else {
+            hasPermissionGps = true;
+            gpsInit();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(
+            int requestCode, String permissions[], int[] grantResults) {
+
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        switch (requestCode) {
+            case REQUEST_PERMISSIONS: {
+
+                for (int i = 0; i < permissions.length; i++) {
+
+                    String permission = permissions[i];
+                    int grantResult = grantResults[i];
+
+                    if (permission.equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        hasPermissionGps = (grantResult == PackageManager.PERMISSION_GRANTED);
+                        gpsInit();
+                    }
+                }
+
+                return;
+            }
+            // other 'case' lines to check for other
+            // permissions this app might request
+        }
     }
 
     @Override
@@ -412,6 +463,27 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             wakeLock.release();
     }
 
+    private boolean hasPermissions(
+            int requestCode, Activity activity, String... requestPermission) {
+
+        boolean testPermissions = true;
+
+        for (String permission : requestPermission) {
+            if (ActivityCompat.checkSelfPermission(activity, permission)
+                    != PackageManager.PERMISSION_GRANTED) {
+
+                testPermissions = false;
+                break;
+            }
+        }
+
+        if (!testPermissions) {
+            ActivityCompat.requestPermissions(activity, requestPermission, requestCode);
+        }
+
+        return testPermissions;
+    }
+
     protected void onResume() {
         super.onResume();
         Log.d(TAG, "Resuming..");
@@ -428,8 +500,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         if (!preRequisites && prefs.getBoolean(ConfigActivity.ENABLE_BT_KEY, false)) {
             preRequisites = btAdapter != null && btAdapter.enable();
         }
-
-        gpsInit();
 
         if (!preRequisites) {
             showDialog(BLUETOOTH_DISABLED);
@@ -706,6 +776,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         super.onActivityResult(requestCode, resultCode, data);
     }
 
+    @SuppressLint("MissingPermission")
     private synchronized void gpsStart() {
         if (!mGpsIsStarted && mLocProvider != null && mLocService != null && mLocService.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             mLocService.requestLocationUpdates(mLocProvider.getName(), getGpsUpdatePeriod(prefs), getGpsDistanceUpdatePeriod(prefs), this);
@@ -750,6 +821,5 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             Log.d(TAG, "Done");
             return null;
         }
-
     }
 }

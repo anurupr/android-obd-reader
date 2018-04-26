@@ -319,12 +319,16 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
     }
 
     private void checkGps() {
-        LocationManager mLocService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-        if (mLocService != null) {
-            LocationProvider mLocProvider = mLocService.getProvider(LocationManager.GPS_PROVIDER);
-            if (mLocProvider == null) {
-                hideGPSCategory();
+        if (MainActivity.hasPermissionGps) {
+            LocationManager mLocService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+            if (mLocService != null) {
+                LocationProvider mLocProvider = mLocService.getProvider(LocationManager.GPS_PROVIDER);
+                if (mLocProvider == null) {
+                    hideGPSCategory();
+                }
             }
+        } else {
+            hideGPSCategory();
         }
     }
 
@@ -333,7 +337,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         PreferenceCategory preferenceCategory = (PreferenceCategory) findPreference(getResources().getString(R.string.pref_gps_category));
         if (preferenceCategory != null) {
             preferenceCategory.removeAll();
-            preferenceScreen.removePreference((Preference) preferenceCategory);
+            preferenceScreen.removePreference(preferenceCategory);
         }
     }
 }
