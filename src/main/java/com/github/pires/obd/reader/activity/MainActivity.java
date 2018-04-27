@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
+import com.github.pires.obd.commands.engine.MassAirFlowCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.engine.RuntimeCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
@@ -65,6 +66,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -111,7 +113,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     boolean mGpsIsStarted = false;
     private int paramSpeed = 0;
     private double paramMaf = 0.0;
-    private double consumptionResult = 0.0;
+
     private LocationManager mLocService;
     private LocationProvider mLocProvider;
     private LogCSVWriter myCSVWriter;
@@ -119,6 +121,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     /// the trip log
     private TripLog triplog;
     private TripRecord currentTrip;
+
+    private String consumptionResult = "0,00 km/l";
+    private String consumptionAverage = "0,00 km/l";
+
+    private List<Double> consumptionList = new ArrayList<>();
 
     //@InjectView(R.id.compass_text)
     private TextView compass;
@@ -307,7 +314,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 Log.e("***************", "***************");
 
-                setConsumptionParams(cmdID, cmdResult);
+                setConsumptionParams(cmdID, job.getCommand());
 
                 if (vv.findViewWithTag(cmdID) != null) {
                     TextView existingTV = vv.findViewWithTag(cmdID);
@@ -322,32 +329,50 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }
     }
 
-    private void setConsumptionParams(String cmdID, String cmdResult) {
-        if (cmdID.equals("MAF")) {
-            cmdResult = cmdResult.substring(0, cmdResult.length() - 3);
-            Log.e("massAirFlow", "@" + cmdResult);
-            paramMaf = Double.parseDouble(cmdResult.replace(",", "."));
-        } else if (cmdID.equals("SPEED")) {
-            cmdResult = cmdResult.substring(0, cmdResult.length() - 4);
-            Log.e("speedVehicle", "@" + cmdResult);
+    private void setConsumptionParams(String cmdID, ObdCommand cmd) {
 
-            DecimalFormat decim = new DecimalFormat("0.00");
-            paramSpeed = Integer.parseInt(cmdResult);
+        if (cmdID.equals("MAF")) {
+            paramMaf = ((MassAirFlowCommand) cmd).getMAF();
+        } else if (cmdID.equals("SPEED")) {
+            paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
         }
 
         calcConsumption(CalcOBD2.Fuel.E27);
     }
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
-        consumptionResult = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
 
-        String result = consumptionResult + "";
-        Log.e("CONSUMPTION", "@" + result);
 
-        TextView existingTV = vv.findViewWithTag("CONSUMPTION");
-        existingTV.setText(result);
+        double next = CalcOBD2.getConsumption(fuel, paramMaf, paramSpeed);
+
+        consumptionResult = new DecimalFormat("0.00").format(next) + "km/l";
+
+        int size = consumptionList.size();
+
+        Log.i("NEXT", "@@@ " + next);
+
+
+        TextView existingTV;
+
+        consumptionList.add(next);
+        consumptionAverage =
+                new DecimalFormat("0.00").format(
+                        CalcOBD2.getAverage(consumptionList)) + "km/l";
+
+        existingTV = vv.findViewWithTag("AVERAGE");
+        existingTV.setText(consumptionAverage);
+
+        //Log.i("SIZE","@@@ " + size);
+
+/*        for(double teste : consumptionList) {
+            Log.i("'###################","@" + teste);
+        }*/
+
+        //consumptionList.add(next);
+
+        existingTV = vv.findViewWithTag("CONSUMPTION");
+        existingTV.setText(consumptionResult);
     }
-
 
     @SuppressLint("MissingPermission")
     private void gpsInit() {

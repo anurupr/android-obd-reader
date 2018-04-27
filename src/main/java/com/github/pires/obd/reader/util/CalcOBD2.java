@@ -1,26 +1,39 @@
 package com.github.pires.obd.reader.util;
 
+import java.util.List;
 
 public class CalcOBD2 {
 
-    //private final int SECONDS_HOUR = 3600;
+    public static double getConsumption(Fuel fuel, double massAirFlow, int vehicleSpeed) {
 
-    public CalcOBD2() {
+        if (massAirFlow == 0.0)
+            return 0.0;
 
-    }
+        if (vehicleSpeed < 1)
+            vehicleSpeed = 1;
 
-    public static double getFuelConsumption(Fuel fuel, double massAirFlow, int vehicleSpeed) {
-        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (3600 * massAirFlow);
         // measured in km/l
+        return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
     }
 
-    public double getFuelCapacity(double totalCapacity, double fuelInputPercent) {
+    public static double getAverage(List<Double> values) {
+        double total = 0.0;
+
+        for (double n : values) {
+            total += n;
+        }
+
+        return total / values.size();
+
+    }
+
+    public double getTankFuelCapacity(double totalCapacity, double fuelInputPercent) {
         return totalCapacity * (fuelInputPercent / 100);
         // measured in liters
     }
 
     public double getFuelCapacityRange(double consumption, double totalCapacity, double fuelInputPercent) {
-        return getFuelCapacity(totalCapacity, fuelInputPercent) * consumption;
+        return getTankFuelCapacity(totalCapacity, fuelInputPercent) * consumption;
         // autonomy in km range
     }
 
@@ -32,25 +45,26 @@ public class CalcOBD2 {
         GasNatural(17.2, 712),
         E27((0.73 * 14.68) + (0.27 * 9), (0.73 * 803) + (0.27 * 789));
 
-        // measured in g/m3
-        double airFuel;
+        // measured in g
+        double airFuelRatio;
 
-        // measured in g/m3
-        double densityFuel;
+        // measured in g
+        double density;
 
-        Fuel(double airFuel, double densityFuel) {
-            this.airFuel = airFuel;
-            this.densityFuel = densityFuel;
+        Fuel(double airFuelRatio, double density) {
+            this.airFuelRatio = airFuelRatio;
+            this.density = density;
         }
 
-        public double getAirFuel() {
-            return airFuel;
+        public double getAirFuelRatio() {
+            return airFuelRatio;
         }
 
-        public double getDensityFuel() {
-            return densityFuel;
+        public double getDensity() {
+            return density;
         }
     }
+
 
     // calc velocidade media
     // calc tempo decorrido
