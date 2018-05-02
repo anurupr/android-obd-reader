@@ -1,6 +1,8 @@
 package com.github.pires.obd.reader.util;
 
 
+import java.util.List;
+
 /**
  *
  */
@@ -13,8 +15,30 @@ public class CalcOBD2 {
      * @return
      */
     public static double getFuelConsumption(Fuel fuel, double massAirFlow, int vehicleSpeed) {
-        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (3600 * massAirFlow);
+
+        if (massAirFlow == 0.0)
+            return 0.0;
+
+        if (vehicleSpeed < 1)
+            vehicleSpeed = 1;
+
         // measured in km/l
+        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (3600 * massAirFlow);
+    }
+
+    /**
+     *
+     * @param values
+     * @return
+     */
+    public static double getAverage(List<Double> values) {
+        double total = 0.0;
+
+        for (double n : values) {
+            total += n;
+        }
+
+        return total / values.size();
     }
 
     /**
@@ -53,8 +77,9 @@ public class CalcOBD2 {
      * @return
      */
     public double getFuelCapacity(double totalCapacity, double fuelInputPercent) {
-        return totalCapacity * (fuelInputPercent / 100);
+
         // measured in liters
+        return totalCapacity * (fuelInputPercent / 100);
     }
 
     /**
@@ -65,8 +90,9 @@ public class CalcOBD2 {
      * @return
      */
     public double getFuelCapacityRange(double consumption, double totalCapacity, double fuelInputPercent) {
-        return getFuelCapacity(totalCapacity, fuelInputPercent) * consumption;
+
         // autonomy in km range
+        return getFuelCapacity(totalCapacity, fuelInputPercent) * consumption;
     }
 
     /**

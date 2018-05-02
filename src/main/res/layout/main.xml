@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/vehicle_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -9,15 +8,16 @@
 
     <TableRow
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:visibility="gone">
 
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="2"
-            android:tag="SPEED"
-            android:text="@string/text_zero"
-            android:textSize="@dimen/abc_text_size_display_3_material" />
+        <!--        <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:tag="SPEED"
+                    android:text="@string/text_zero"
+                    android:textSize="@dimen/abc_text_size_display_1_material" />-->
 
         <TextView
             android:id="@+id/compass_text"
@@ -26,7 +26,8 @@
             android:layout_weight="1"
             android:gravity="end"
             android:text="@string/text_orientation_default"
-            android:textSize="@dimen/abc_text_size_display_3_material" />
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+
     </TableRow>
 
     <TableRow
@@ -38,21 +39,66 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Consumption" />
+            android:text="Speed"
+            android:textSize="@dimen/abc_text_size_medium_material" />
+
+        <TextView
+            android:id="@+id/title_compass_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="MAF"
+            android:textSize="@dimen/abc_text_size_medium_material" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Runtime" />
+            android:tag="SPEED"
+            android:text="@string/text_zero"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="Rotation" />
+            android:tag="MAF"
+            android:text="0"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+
+    </TableRow>
+
+    <!-- ================================================================================= -->
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/title_consumption"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Consumption"
+            android:textSize="@dimen/abc_text_size_medium_material" />
+
+        <TextView
+            android:id="@+id/title_maf"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Average"
+            android:textSize="@dimen/abc_text_size_medium_material" />
     </TableRow>
 
     <TableRow
@@ -65,24 +111,76 @@
             android:layout_weight="1"
             android:gravity="center"
             android:tag="CONSUMPTION"
-            android:text="@string/text_consumption_default" />
+            android:text="0"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+
 
         <TextView
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:tag="ENGINE_RUNTIME"
-            android:text="@string/text_runtime_default" />
-
-        <TextView
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="center"
-            android:tag="ENGINE_RPM"
-            android:text="" />
+            android:tag="AVERAGE"
+            android:text="0"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
     </TableRow>
+
+    <!-- ================================================================================= -->
+
+    <!-- <TableRow
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content">
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:text="Consumption" />
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:text="Runtime" />
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:text="Rotation" />
+     </TableRow>
+
+     <TableRow
+         android:layout_width="fill_parent"
+         android:layout_height="wrap_content">
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:tag="CONSUMPTION"
+             android:text="@string/text_consumption_default" />
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:tag="ENGINE_RUNTIME"
+             android:text="@string/text_runtime_default" />
+
+         <TextView
+             android:layout_width="0dp"
+             android:layout_height="wrap_content"
+             android:layout_weight="1"
+             android:gravity="center"
+             android:tag="ENGINE_RPM"
+             android:text="" />
+     </TableRow>-->
 
     <ScrollView
         android:id="@+id/data_scroll"
