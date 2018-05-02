@@ -1,8 +1,6 @@
 package com.github.pires.obd.reader.util;
 
 
-import java.util.List;
-
 /**
  *
  */
@@ -26,19 +24,15 @@ public class CalcOBD2 {
         return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
     }
 
+
     /**
      *
-     * @param values
+     * @param total
+     * @param divisor
      * @return
      */
-    public static double getAverage(List<Double> values) {
-        double total = 0.0;
-
-        for (double n : values) {
-            total += n;
-        }
-
-        return total / values.size();
+    public static double getAverage(double total, int divisor) {
+        return total / divisor;
     }
 
     /**

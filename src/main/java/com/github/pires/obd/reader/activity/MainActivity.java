@@ -66,7 +66,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -125,7 +124,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private String consumptionResult = "0,00 km/l";
     private String consumptionAverage = "0,00 km/l";
 
-    private List<Double> consumptionList = new ArrayList<>();
+    private double consumptionSum = 0.0;
+    private int consumptionCount = 0;
+
+    //private List<Double> consumptionList = new ArrayList<>();
 
     //@InjectView(R.id.compass_text)
     private TextView compass;
@@ -342,33 +344,24 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
 
+        double consumption = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
 
-        double next = CalcOBD2.getConsumption(fuel, paramMaf, paramSpeed);
+        consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
 
-        consumptionResult = new DecimalFormat("0.00").format(next) + "km/l";
-
-        int size = consumptionList.size();
-
-        Log.i("NEXT", "@@@ " + next);
-
+        Log.i("Consumption", "@@@ " + consumption);
 
         TextView existingTV;
 
-        consumptionList.add(next);
+        consumptionSum += consumption;
+        consumptionCount += 1;
+
         consumptionAverage =
                 new DecimalFormat("0.00").format(
-                        CalcOBD2.getAverage(consumptionList)) + "km/l";
+                        CalcOBD2.getAverage(consumptionSum, consumptionCount)) + "km/l";
 
         existingTV = vv.findViewWithTag("AVERAGE");
         existingTV.setText(consumptionAverage);
 
-        //Log.i("SIZE","@@@ " + size);
-
-/*        for(double teste : consumptionList) {
-            Log.i("'###################","@" + teste);
-        }*/
-
-        //consumptionList.add(next);
 
         existingTV = vv.findViewWithTag("CONSUMPTION");
         existingTV.setText(consumptionResult);
@@ -451,8 +444,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         triplog = TripLog.getInstance(this.getApplicationContext());
 
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
-
-
     }
 
     @Override
@@ -519,28 +510,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
             btAdapter.disable();
     }
-
-
-/*    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        if (mLocService != null) {
-            mLocService.removeGpsStatusListener(this);
-            mLocService.removeUpdates(this);
-        }
-
-        releaseWakeLockIfHeld();
-        if (isServiceBound) {
-            doUnbindService();
-        }
-
-        endTrip();
-
-        final BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
-        if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
-            btAdapter.disable();
-    }*/
 
     @Override
     protected void onPause() {
