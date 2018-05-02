@@ -36,9 +36,9 @@ android {
         applicationId 'com.github.pires.obd.reader'
     }
 
-    lintOptions {
+/*    lintOptions {
         abortOnError false
-    }
+    }*/
 
     buildTypes {
         release {
