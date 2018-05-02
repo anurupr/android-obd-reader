@@ -23,7 +23,7 @@ public class CalcOBD2 {
             vehicleSpeed = 1;
 
         // measured in km/l
-        return (fuel.getAirFuel() * fuel.getDensityFuel() * vehicleSpeed) / (3600 * massAirFlow);
+        return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
     }
 
     /**
@@ -107,22 +107,22 @@ public class CalcOBD2 {
         E27((0.73 * 14.68) + (0.27 * 9), (0.73 * 803) + (0.27 * 789));
 
         // measured in g/m3
-        double airFuel;
+        double airFuelRatio;
 
         // measured in g/m3
-        double densityFuel;
+        double density;
 
-        Fuel(double airFuel, double densityFuel) {
-            this.airFuel = airFuel;
-            this.densityFuel = densityFuel;
+        Fuel(double airFuel, double density) {
+            this.airFuelRatio = airFuel;
+            this.density = density;
         }
 
-        public double getAirFuel() {
-            return airFuel;
+        public double getAirFuelRatio() {
+            return airFuelRatio;
         }
 
-        public double getDensityFuel() {
-            return densityFuel;
+        public double getDensity() {
+            return density;
         }
     }
 }
