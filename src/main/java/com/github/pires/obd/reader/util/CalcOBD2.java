@@ -112,8 +112,8 @@ public class CalcOBD2 {
         // measured in g/m3
         double density;
 
-        Fuel(double airFuel, double density) {
-            this.airFuelRatio = airFuel;
+        Fuel(double airFuelRatio, double density) {
+            this.airFuelRatio = airFuelRatio;
             this.density = density;
         }
 
