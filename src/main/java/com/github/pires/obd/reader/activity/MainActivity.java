@@ -44,6 +44,7 @@ import android.widget.Toast;
 
 import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
+import com.github.pires.obd.commands.engine.LoadCommand;
 import com.github.pires.obd.commands.engine.MassAirFlowCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.engine.RuntimeCommand;
@@ -110,8 +111,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }*/
     public Map<String, String> commandResult = new HashMap<>();
     boolean mGpsIsStarted = false;
+
     private int paramSpeed = 0;
     private double paramMaf = 0.0;
+    private double paramEngineLoad = 0.0;
 
     private LocationManager mLocService;
     private LocationProvider mLocProvider;
@@ -331,12 +334,34 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }
     }
 
+
     private void setConsumptionParams(String cmdID, ObdCommand cmd) {
 
         if (cmdID.equals("MAF")) {
             paramMaf = ((MassAirFlowCommand) cmd).getMAF();
+
+            Toast.makeText(
+                    getBaseContext(),
+                    "MAF: " + paramMaf,
+                    Toast.LENGTH_SHORT
+            ).show();
+
         } else if (cmdID.equals("SPEED")) {
             paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
+
+            Toast.makeText(
+                    getBaseContext(),
+                    "SPEED: " + paramSpeed,
+                    Toast.LENGTH_SHORT
+            ).show();
+        } else if (cmdID.equals("ENGINE_LOAD")) {
+            paramEngineLoad = ((LoadCommand) cmd).getPercentage();
+
+            Toast.makeText(
+                    getBaseContext(),
+                    "ENGINE_LOAD: " + paramEngineLoad,
+                    Toast.LENGTH_SHORT
+            ).show();
         }
 
         calcConsumption(CalcOBD2.Fuel.E27);
@@ -344,7 +369,18 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
 
-        double consumption = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
+        double consumption = 0.0;
+
+/*        if(paramMaf != 0.0) {
+            consumption = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
+        }
+        else {
+            consumption = CalcOBD2.getFuelConsumption(fuel, 116, paramSpeed, paramEngineLoad);
+        }*/
+
+        consumption = CalcOBD2.getFuelConsumption(fuel, paramSpeed, 116, paramEngineLoad);
+
+
 
         consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
 

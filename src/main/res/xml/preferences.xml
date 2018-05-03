@@ -75,7 +75,7 @@
             android:summaryOn="@string/pref_imperial_units_summaryOn"
             android:title="@string/pref_imperial_units_title" />
         <EditTextPreference
-            android:defaultValue="10"
+            android:defaultValue="6"
             android:dialogTitle="@string/pref_obd_update_period_title"
             android:key="obd_update_period_preference"
             android:summary="@string/pref_obd_update_period_summary"

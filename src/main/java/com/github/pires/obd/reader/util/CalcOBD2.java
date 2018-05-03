@@ -24,6 +24,20 @@ public class CalcOBD2 {
         return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
     }
 
+    public static double getFuelConsumption(Fuel fuel, int vehicleSpeed, int bhp, double engineLoad) {
+
+        double massAirFlow = ((bhp / 1.25) / 100) * engineLoad;
+
+        if (massAirFlow == 0.0)
+            return 0.0;
+
+        if (vehicleSpeed < 1)
+            vehicleSpeed = 1;
+
+        // measured in km/l
+        return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
+    }
+
 
     /**
      *
