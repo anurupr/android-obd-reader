@@ -22,7 +22,7 @@
         <TextView
             android:id="@+id/compass_text"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_weight="1"
             android:gravity="end"
             android:text="@string/text_orientation_default"
@@ -58,7 +58,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="SPEED"
@@ -67,7 +67,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="ENGINE_RPM"
@@ -105,7 +105,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="MAF"
@@ -114,7 +114,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="THROTTLE_POS"
@@ -154,7 +154,7 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="CONSUMPTION"
@@ -164,12 +164,13 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="45dp"
             android:layout_weight="1"
             android:gravity="center"
             android:tag="AVERAGE"
             android:text="0"
             android:textSize="@dimen/abc_text_size_display_1_material" />
+
     </TableRow>
 
     <!-- ================================================================================= -->
