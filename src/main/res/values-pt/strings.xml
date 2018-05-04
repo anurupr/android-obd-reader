@@ -98,4 +98,6 @@
     <string name="pref_engine_horse_power_summary">Utilizado para economia de combust&#237;vel em ve&#237;culos sem sensor MAF</string>
     <string name="pref_fuel_type_title">Tipo de combust&#237;vel</string>
     <string name="pref_fuel_type_summary">Selecione o tipo de combust&#237;vel</string>
+    <string name="pref_fuel_tank_title">Tanque de combust&#237;vel (em litros)</string>
+    <string name="pref_fuel_tank_summary">Usado para calcular a autonomia do ve&#237;culo</string>
 </resources>

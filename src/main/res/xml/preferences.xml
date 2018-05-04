@@ -115,6 +115,12 @@
             android:summary="@string/pref_engine_displacement_summary"
             android:title="@string/pref_engine_displacement_title" />
         <EditTextPreference
+            android:defaultValue="45"
+            android:dialogTitle="@string/pref_fuel_tank_title"
+            android:key="fuel_tank_preference"
+            android:summary="@string/pref_fuel_tank_summary"
+            android:title="@string/pref_fuel_tank_title" />
+        <EditTextPreference
             android:defaultValue="116"
             android:dialogTitle="@string/pref_engine_horse_power_title"
             android:key="engine_horse_power_preference"
