@@ -3,7 +3,8 @@
     android:id="@+id/vehicle_view"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:paddingTop="@dimen/activity_vertical_margin">
 
     <TableRow
         android:layout_width="fill_parent"
