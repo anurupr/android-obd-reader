@@ -341,42 +341,44 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
             paramMaf = ((MassAirFlowCommand) cmd).getMAF();
 
-            Toast.makeText(
+/*            Toast.makeText(
                     getBaseContext(),
                     "MAF: " + paramMaf,
                     Toast.LENGTH_SHORT
-            ).show();
+            ).show();*/
 
             //calcConsumption(CalcOBD2.Fuel.E27); THROTTLE_POS
         } else if (cmdID.equals("THROTTLE_POS")) {
 
             paramThrottle = ((ThrottlePositionCommand) cmd).getPercentage();
 
-            Toast.makeText(
+/*            Toast.makeText(
                     getBaseContext(),
                     "THROTTLE_POS: " + paramThrottle,
                     Toast.LENGTH_SHORT
-            ).show();
+            ).show();*/
 
             //calcConsumption(CalcOBD2.Fuel.E27);
         } else if (cmdID.equals("ENGINE_RPM")) {
             paramRpm = ((RPMCommand) cmd).getRPM();
 
-            Toast.makeText(
+/*            Toast.makeText(
                     getBaseContext(),
                     "ENGINE_RPM: " + paramRpm,
                     Toast.LENGTH_SHORT
-            ).show();
+            ).show();*/
 
             //calcConsumption(CalcOBD2.Fuel.E27);
         } else if (cmdID.equals("SPEED")) {
             paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
 
+/*
             Toast.makeText(
                     getBaseContext(),
                     "SPEED: " + paramSpeed,
                     Toast.LENGTH_SHORT
             ).show();
+*/
 
             calcConsumption(CalcOBD2.Fuel.E27);
         }
