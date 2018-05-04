@@ -44,10 +44,10 @@ import android.widget.Toast;
 
 import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.commands.SpeedCommand;
-import com.github.pires.obd.commands.engine.LoadCommand;
 import com.github.pires.obd.commands.engine.MassAirFlowCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.engine.RuntimeCommand;
+import com.github.pires.obd.commands.engine.ThrottlePositionCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.config.ObdConfig;
@@ -113,8 +113,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     boolean mGpsIsStarted = false;
 
     private int paramSpeed = 0;
-    private double paramMaf = 0.0;
-    private double paramEngineLoad = 0.0;
+    private double paramMaf = 0;
+    private int paramRpm = 0;
+    private double paramThrottle = 0;
 
     private LocationManager mLocService;
     private LocationProvider mLocProvider;
@@ -336,8 +337,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
 
     private void setConsumptionParams(String cmdID, ObdCommand cmd) {
-
         if (cmdID.equals("MAF")) {
+
             paramMaf = ((MassAirFlowCommand) cmd).getMAF();
 
             Toast.makeText(
@@ -346,6 +347,28 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     Toast.LENGTH_SHORT
             ).show();
 
+            //calcConsumption(CalcOBD2.Fuel.E27); THROTTLE_POS
+        } else if (cmdID.equals("THROTTLE_POS")) {
+
+            paramThrottle = ((ThrottlePositionCommand) cmd).getPercentage();
+
+            Toast.makeText(
+                    getBaseContext(),
+                    "THROTTLE_POS: " + paramThrottle,
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            //calcConsumption(CalcOBD2.Fuel.E27);
+        } else if (cmdID.equals("ENGINE_RPM")) {
+            paramRpm = ((RPMCommand) cmd).getRPM();
+
+            Toast.makeText(
+                    getBaseContext(),
+                    "ENGINE_RPM: " + paramRpm,
+                    Toast.LENGTH_SHORT
+            ).show();
+
+            //calcConsumption(CalcOBD2.Fuel.E27);
         } else if (cmdID.equals("SPEED")) {
             paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
 
@@ -354,33 +377,23 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     "SPEED: " + paramSpeed,
                     Toast.LENGTH_SHORT
             ).show();
-        } else if (cmdID.equals("ENGINE_LOAD")) {
-            paramEngineLoad = ((LoadCommand) cmd).getPercentage();
 
-            Toast.makeText(
-                    getBaseContext(),
-                    "ENGINE_LOAD: " + paramEngineLoad,
-                    Toast.LENGTH_SHORT
-            ).show();
+            calcConsumption(CalcOBD2.Fuel.E27);
         }
-
-        calcConsumption(CalcOBD2.Fuel.E27);
     }
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
 
-        double consumption = 0.0;
+        double consumption;
 
-/*        if(paramMaf != 0.0) {
-            consumption = CalcOBD2.getFuelConsumption(fuel, paramMaf, paramSpeed);
+
+        if (paramMaf > 0) {
+            consumption = CalcOBD2.getFuelConsumptionMAF(fuel, paramSpeed, paramMaf);
+        } else if (paramThrottle > 0) {
+            consumption = CalcOBD2.getFuelConsumptionThrottle(fuel, 116, paramSpeed, paramThrottle);
+        } else {
+            consumption = CalcOBD2.getFuelConsumptionRPM(fuel, 116, paramSpeed, paramRpm);
         }
-        else {
-            consumption = CalcOBD2.getFuelConsumption(fuel, 116, paramSpeed, paramEngineLoad);
-        }*/
-
-        consumption = CalcOBD2.getFuelConsumption(fuel, paramSpeed, 116, paramEngineLoad);
-
-
 
         consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
 

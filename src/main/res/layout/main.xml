@@ -48,7 +48,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
-            android:text="MAF"
+            android:text="RPM"
             android:textSize="@dimen/abc_text_size_medium_material" />
     </TableRow>
 
@@ -70,7 +70,54 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="center"
+            android:tag="ENGINE_RPM"
+            android:text="0"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+
+    </TableRow>
+
+    <!-- ================================================================================= -->
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="MAF"
+            android:textSize="@dimen/abc_text_size_medium_material" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="Throttle"
+            android:textSize="@dimen/abc_text_size_medium_material" />
+    </TableRow>
+
+    <TableRow
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
             android:tag="MAF"
+            android:text="@string/text_zero"
+            android:textSize="@dimen/abc_text_size_display_1_material" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:tag="THROTTLE_POS"
             android:text="0"
             android:textSize="@dimen/abc_text_size_display_1_material" />
 
