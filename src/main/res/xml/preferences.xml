@@ -77,6 +77,12 @@
             android:key="obd_protocols_preference"
             android:summary="@string/pref_obd_protocols_summary"
             android:title="@string/pref_obd_protocols_title" />
+        <ListPreference
+            android:defaultValue="E27"
+            android:dialogTitle="@string/pref_fuel_type_title"
+            android:key="fuel_type_preference"
+            android:summary="@string/pref_fuel_type_summary"
+            android:title="@string/pref_fuel_type_title" />
         <CheckBoxPreference
             android:defaultValue="false"
             android:dialogTitle="@string/pref_imperial_units_title"

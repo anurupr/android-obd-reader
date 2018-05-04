@@ -347,7 +347,12 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         } else if (cmdID.equals("SPEED")) {
             paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
-            calcConsumption(CalcOBD2.Fuel.E27);
+
+            CalcOBD2.Fuel fuelType = CalcOBD2.Fuel.valueOf(
+                    prefs.getString("fuel_type_preference", "E27")
+            );
+
+            calcConsumption(fuelType);
         }
     }
 

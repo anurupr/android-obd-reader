@@ -23,6 +23,7 @@ import com.github.pires.obd.commands.ObdCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.config.ObdConfig;
+import com.github.pires.obd.reader.util.CalcOBD2;
 
 import java.util.ArrayList;
 import java.util.Set;
@@ -42,6 +43,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
     public static final String IMPERIAL_UNITS_KEY = "imperial_units_preference";
     public static final String COMMANDS_SCREEN_KEY = "obd_commands_screen";
     public static final String PROTOCOLS_LIST_KEY = "obd_protocols_preference";
+    public static final String FUEL_LIST_KEY = "fuel_type_preference";
     public static final String ENABLE_GPS_KEY = "enable_gps_preference";
     public static final String GPS_UPDATE_PERIOD_KEY = "gps_update_period_preference";
     public static final String GPS_DISTANCE_PERIOD_KEY = "gps_distance_period_preference";
@@ -203,8 +205,11 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         ListPreference listBtDevices = (ListPreference) getPreferenceScreen()
                 .findPreference(BLUETOOTH_LIST_KEY);
         ArrayList<CharSequence> protocolStrings = new ArrayList<>();
+        ArrayList<CharSequence> FuelStrings = new ArrayList<>();
         ListPreference listProtocols = (ListPreference) getPreferenceScreen()
                 .findPreference(PROTOCOLS_LIST_KEY);
+        ListPreference listFuels = (ListPreference) getPreferenceScreen()
+                .findPreference(FUEL_LIST_KEY);
         String[] prefKeys = new String[]{ENGINE_DISPLACEMENT_KEY,
                 VOLUMETRIC_EFFICIENCY_KEY, OBD_UPDATE_PERIOD_KEY, MAX_FUEL_ECON_KEY};
         for (String prefKey : prefKeys) {
@@ -238,6 +243,20 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         }
         listProtocols.setEntries(protocolStrings.toArray(new CharSequence[0]));
         listProtocols.setEntryValues(protocolStrings.toArray(new CharSequence[0]));
+
+
+
+    /*
+     * Available Fuel types
+     *
+     */
+        for (CalcOBD2.Fuel fuel : CalcOBD2.Fuel.values()) {
+            FuelStrings.add(fuel.name());
+        }
+        listFuels.setEntries(FuelStrings.toArray(new CharSequence[0]));
+        listFuels.setEntryValues(FuelStrings.toArray(new CharSequence[0]));
+
+
 
     /*
      * Let's use this device Bluetooth adapter to select which paired OBD-II
