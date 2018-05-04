@@ -106,4 +106,7 @@
     <string name="pref_dev_email_title">Developer Email</string>
     <string name="pref_dev_email_summary">Logs will be emailed to this address</string>
     <string name="text_noerrors">There were no errors found.!</string>
+
+    <string name="pref_engine_horse_power_title">Maximum power (in HP)</string>
+    <string name="pref_engine_horse_power_summary">Used for fuel economy on vehicles without MAF sensor</string>
 </resources>

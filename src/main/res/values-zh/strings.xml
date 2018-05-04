@@ -104,4 +104,7 @@
     <string name="pref_dirname_dialogTitle">选择需要保存日志的目录名</string>
     <string name="pref_dirname_title">目录名</string>
     <string name="pref_dirname_summary">保存文件的目录名</string>
+
+    <string name="pref_engine_horse_power_title">最大功率（以HP计）</string>
+    <string name="pref_engine_horse_power_summary">用于没有MAF传感器的车辆上的燃油经济性</string>
 </resources>

@@ -330,7 +330,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 commandResult.put(cmdID, cmdResult);
                 updateTripStatistic(job, cmdID);
-
             }
         }
     }
@@ -338,70 +337,40 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void setConsumptionParams(String cmdID, ObdCommand cmd) {
         if (cmdID.equals("MAF")) {
-
             paramMaf = ((MassAirFlowCommand) cmd).getMAF();
 
-/*            Toast.makeText(
-                    getBaseContext(),
-                    "MAF: " + paramMaf,
-                    Toast.LENGTH_SHORT
-            ).show();*/
-
-            //calcConsumption(CalcOBD2.Fuel.E27); THROTTLE_POS
         } else if (cmdID.equals("THROTTLE_POS")) {
-
             paramThrottle = ((ThrottlePositionCommand) cmd).getPercentage();
 
-/*            Toast.makeText(
-                    getBaseContext(),
-                    "THROTTLE_POS: " + paramThrottle,
-                    Toast.LENGTH_SHORT
-            ).show();*/
-
-            //calcConsumption(CalcOBD2.Fuel.E27);
         } else if (cmdID.equals("ENGINE_RPM")) {
             paramRpm = ((RPMCommand) cmd).getRPM();
 
-/*            Toast.makeText(
-                    getBaseContext(),
-                    "ENGINE_RPM: " + paramRpm,
-                    Toast.LENGTH_SHORT
-            ).show();*/
-
-            //calcConsumption(CalcOBD2.Fuel.E27);
         } else if (cmdID.equals("SPEED")) {
             paramSpeed = ((SpeedCommand) cmd).getMetricSpeed();
-
-/*
-            Toast.makeText(
-                    getBaseContext(),
-                    "SPEED: " + paramSpeed,
-                    Toast.LENGTH_SHORT
-            ).show();
-*/
-
             calcConsumption(CalcOBD2.Fuel.E27);
         }
     }
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
 
-        double consumption;
+        double consumption = 0;
 
+        int bhp = Integer.parseInt(prefs.getString("engine_horse_power_preference", "-1"));
 
         if (paramMaf > 0) {
             consumption = CalcOBD2.getFuelConsumptionMAF(fuel, paramSpeed, paramMaf);
-        } else if (paramThrottle > 0) {
-            consumption = CalcOBD2.getFuelConsumptionThrottle(fuel, 116, paramSpeed, paramThrottle);
-        } else {
-            consumption = CalcOBD2.getFuelConsumptionRPM(fuel, 116, paramSpeed, paramRpm);
+        } else if (paramThrottle > 0 && bhp > 0) {
+            consumption = CalcOBD2.getFuelConsumptionThrottle(fuel, bhp, paramSpeed, paramThrottle);
+        } else if (bhp > 0) {
+            consumption = CalcOBD2.getFuelConsumptionRPM(fuel, bhp, paramSpeed, paramRpm);
         }
+
+        TextView existingTV;
 
         consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
 
-        Log.i("Consumption", "@@@ " + consumption);
-
-        TextView existingTV;
+        existingTV = vv.findViewWithTag("CONSUMPTION");
+        existingTV.setText(consumptionResult);
 
         consumptionSum += consumption;
         consumptionCount += 1;
@@ -412,10 +381,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         existingTV = vv.findViewWithTag("AVERAGE");
         existingTV.setText(consumptionAverage);
-
-
-        existingTV = vv.findViewWithTag("CONSUMPTION");
-        existingTV.setText(consumptionResult);
     }
 
     @SuppressLint("MissingPermission")

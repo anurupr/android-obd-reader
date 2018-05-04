@@ -82,4 +82,7 @@
     <string name="pref_reader_config_summary">Konfiguration des Bluetooth Readers. Je eine Einstellung pro Zeile</string>
     <string name="pref_vehicle_id_summary">Optionaler Key für dieses Fahrzeug, wird beim Upload der Daten genutzt</string>
     <string name="pref_volumetric_efficiency_title">Volumetrischer Wirkungsgrad</string>
+
+    <string name="pref_engine_horse_power_title">Maximale Leistung (in HP)</string>
+    <string name="pref_engine_horse_power_summary">Wird für die Verbrauchsberechnung bei Fahrzeuge ohne Luftmassensensor benötigt</string>
 </resources>

@@ -93,4 +93,7 @@
     <string name="pref_max_fuel_econ_summary">Qualquer economia de combustível maior do que isso será jogada fora</string>
     <string name="pref_max_fuel_econ_title">Valor M&#225;ximo de Economia de Combust&#237;vel</string>
     <string name="pref_volumetric_efficiency_summary">Utilizado para economia de combust&#237;vel em ve&#237;culos sem sensor MAF</string>
+
+    <string name="pref_engine_horse_power_title">Pot&#234;ncia m&#225;xima (em CV)</string>
+    <string name="pref_engine_horse_power_summary">Utilizado para economia de combust&#237;vel em ve&#237;culos sem sensor MAF</string>
 </resources>
