@@ -1,5 +1,6 @@
 package com.github.pires.obd.reader.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
@@ -38,8 +39,9 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_trips_list);
+        setupActionBar();
 
-        ListView lv = (ListView) findViewById(R.id.tripList);
+        ListView lv = findViewById(R.id.tripList);
 
         triplog = TripLog.getInstance(this.getApplicationContext());
         records = triplog.readAllRecords();
@@ -48,10 +50,23 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
         registerForContextMenu(lv);
     }
 
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    private void setupActionBar() {
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            // Show the Up button in the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.menu_trips_list, menu);
+
         return true;
     }
 
@@ -60,11 +75,18 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                // Do something here. This is the event fired when up button is pressed.
+                finish();
+                return true;
+
+            case R.id.action_settings:
+                return true;
+
         }
 
         return super.onOptionsItemSelected(item);

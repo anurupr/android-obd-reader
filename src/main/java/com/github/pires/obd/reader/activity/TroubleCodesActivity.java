@@ -1,5 +1,6 @@
 package com.github.pires.obd.reader.activity;
 
+import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
@@ -71,7 +72,7 @@ public class TroubleCodesActivity extends Activity {
 
 
         public boolean handleMessage(Message msg) {
-             Log.d(TAG, "Message received on handler");
+            Log.d(TAG, "Message received on handler");
             switch (msg.what) {
                 case NO_BLUETOOTH_DEVICE_SELECTED:
                     makeToast(getString(R.string.text_bluetooth_nodevice));
@@ -119,10 +120,12 @@ public class TroubleCodesActivity extends Activity {
             return false;
         }
     });
-    
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setupActionBar();
+
         prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) {
@@ -141,6 +144,17 @@ public class TroubleCodesActivity extends Activity {
         }
     }
 
+    /**
+     * Set up the {@link android.app.ActionBar}, if the API is available.
+     */
+    private void setupActionBar() {
+        ActionBar actionBar = getActionBar();
+        if (actionBar != null) {
+            // Show the Up button in the action bar.
+            actionBar.setDisplayHomeAsUpEnabled(true);
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu items for use in the action bar
@@ -153,6 +167,11 @@ public class TroubleCodesActivity extends Activity {
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle presses on the action bar items
         switch (item.getItemId()) {
+            case android.R.id.home:
+                // Do something here. This is the event fired when up button is pressed.
+                finish();
+                return true;
+
             case R.id.action_clear_codes:
                 try {
                     sock = BluetoothManager.connect(dev);
@@ -208,12 +227,14 @@ public class TroubleCodesActivity extends Activity {
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_SHORT);
         toast.show();
     }
+
     public void makeToastLong(String text) {
         Toast toast = Toast.makeText(getApplicationContext(), text, Toast.LENGTH_LONG);
         toast.show();
     }
+
     private void dataOk(String res) {
-        ListView lv = (ListView) findViewById(R.id.listView);
+        ListView lv = findViewById(R.id.listView);
         Map<String, String> dtcVals = getDict(R.array.dtc_keys, R.array.dtc_values);
         //TODO replace below codes (res) with aboce dtcVals
         //String tmpVal = dtcVals.get(res.split("\n"));
