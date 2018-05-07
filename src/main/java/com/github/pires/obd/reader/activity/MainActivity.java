@@ -132,6 +132,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private String consumptionResult = "0,00 km/l";
     private String consumptionAverage = "0,00 km/l";
 
+    private long paramTimeStamp = 0;
+    private float paramFuelInput = 0;
+    private float paramTankCapacity = 0;
+
     private double consumptionSum = 0.0;
     private int consumptionCount = 0;
 
@@ -328,30 +332,16 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 Log.e("***************", "***************");
 
-                if (cmdID.equals("FUEL_LEVEL")) {
 
+
+                    /*
                     Toast.makeText(
                             getBaseContext(),
                             "FUEL_LEVEL: " + ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
                             Toast.LENGTH_SHORT
                     ).show();
+                    */
 
-
-                    try {
-                        dbTripFuel.beginTransaction();
-
-                        tripFuel.stmtInsertIntoTableTripFuel(
-                                stmtTripFuel,
-                                System.currentTimeMillis() / 1000,
-                                ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
-                                45.5
-                        );
-
-                        dbTripFuel.setTransactionSuccessful();
-                    } finally {
-                        dbTripFuel.endTransaction();
-                    }
-                }
 
                 setConsumptionParams(cmdID, job.getCommand());
 
@@ -365,6 +355,29 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 updateTripStatistic(job, cmdID);
             }
         }
+    }
+
+    private double calcConsumption(long timeStamp, float fuelInput, float tank) {
+
+        Toast.makeText(
+                getBaseContext(),
+                "fuelInput: " + fuelInput,
+                Toast.LENGTH_SHORT
+        ).show();
+
+/*        if (paramFuelInput < fuelInput) {
+            return -1;
+        }*/
+
+        double consumption = ((tank * (paramFuelInput - fuelInput)) / (timeStamp - paramTimeStamp)) * 3600;
+
+        Toast.makeText(
+                getBaseContext(),
+                "consumption: " + consumption,
+                Toast.LENGTH_SHORT
+        ).show();
+
+        return consumption;
     }
 
 
@@ -385,13 +398,63 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     prefs.getString("fuel_type_preference", "E27")
             );
 
-            calcConsumption(fuelType);
+            //calcConsumption(fuelType); "FUEL_LEVEL"
+        } else if (cmdID.equals("FUEL_LEVEL")) {
+
+            long correntTimeStamp = System.currentTimeMillis() / 1000;
+            float correntFuelInput = ((FuelLevelCommand) cmd).getFuelLevel();
+            float correntTankCapacity = Float.parseFloat(prefs.getString("fuel_tank_preference", "0"));
+
+            Log.e("correntTimeStamp", "@@@" + correntTimeStamp);
+            Log.e("correntFuelInput", "@@@" + correntFuelInput);
+            Log.e("correntTankCapacity", "@@@" + correntTankCapacity);
+
+            double consumption =
+                    calcConsumption(correntTimeStamp, correntFuelInput, correntTankCapacity);
+
+            if (consumption >= 0) {
+                TextView existingTV;
+
+                consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
+
+                existingTV = vv.findViewWithTag("CONSUMPTION");
+                existingTV.setText(consumptionResult);
+
+                consumptionSum += consumption;
+                consumptionCount += 1;
+
+                consumptionAverage =
+                        new DecimalFormat("0.00").format(
+                                CalcOBD2.getAverage(consumptionSum, consumptionCount)) + "km/l";
+
+                existingTV = vv.findViewWithTag("AVERAGE");
+                existingTV.setText(consumptionAverage);
+            }
+
+            paramTimeStamp = correntTimeStamp;
+            paramFuelInput = correntFuelInput;
+            paramTankCapacity = correntTankCapacity;
+
+            try {
+                dbTripFuel.beginTransaction();
+
+                tripFuel.stmtInsertIntoTableTripFuel(
+                        stmtTripFuel,
+                        paramTimeStamp,
+                        paramFuelInput,
+                        paramTankCapacity
+                );
+
+                dbTripFuel.setTransactionSuccessful();
+            } finally {
+                dbTripFuel.endTransaction();
+            }
         }
     }
 
-    private void calcConsumption(CalcOBD2.Fuel fuel) {
+/*    private void calcConsumption(CalcOBD2.Fuel fuel) {
 
-        double consumption = 0;
+        //double consumption = 0;
 
         int bhp = Integer.parseInt(prefs.getString("engine_horse_power_preference", "-1"));
 
@@ -402,6 +465,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         } else if (bhp > 0) {
             consumption = CalcOBD2.getFuelConsumptionRPM(fuel, bhp, paramSpeed, paramRpm);
         }
+
+        //consumption = calcConsumption()
 
         TextView existingTV;
 
@@ -419,7 +484,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         existingTV = vv.findViewWithTag("AVERAGE");
         existingTV.setText(consumptionAverage);
-    }
+    }*/
 
     @SuppressLint("MissingPermission")
     private void gpsInit() {

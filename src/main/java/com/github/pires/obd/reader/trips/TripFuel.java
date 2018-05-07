@@ -54,7 +54,7 @@ public class TripFuel extends SQLiteOpenHelper {
 
     }
 
-    public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, float input, double tank) {
+    public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, float input, float tank) {
         stmt.bindLong(1, time);
         stmt.bindDouble(2, input);
         stmt.bindDouble(3, tank);
