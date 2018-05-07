@@ -13,6 +13,8 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -48,6 +50,7 @@ import com.github.pires.obd.commands.engine.MassAirFlowCommand;
 import com.github.pires.obd.commands.engine.RPMCommand;
 import com.github.pires.obd.commands.engine.RuntimeCommand;
 import com.github.pires.obd.commands.engine.ThrottlePositionCommand;
+import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.config.ObdConfig;
@@ -59,6 +62,7 @@ import com.github.pires.obd.reader.io.ObdGatewayService;
 import com.github.pires.obd.reader.io.ObdProgressListener;
 import com.github.pires.obd.reader.net.ObdReading;
 import com.github.pires.obd.reader.net.ObdService;
+import com.github.pires.obd.reader.trips.TripFuel;
 import com.github.pires.obd.reader.trips.TripLog;
 import com.github.pires.obd.reader.trips.TripRecord;
 import com.github.pires.obd.reader.util.CalcOBD2;
@@ -130,6 +134,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private double consumptionSum = 0.0;
     private int consumptionCount = 0;
+
+    private TripFuel tripFuel;
+    private SQLiteDatabase dbTripFuel;
+    private SQLiteStatement stmtTripFuel;
 
     //private List<Double> consumptionList = new ArrayList<>();
 
@@ -320,6 +328,31 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 Log.e("***************", "***************");
 
+                if (cmdID.equals("FUEL_LEVEL")) {
+
+                    Toast.makeText(
+                            getBaseContext(),
+                            "FUEL_LEVEL: " + ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+
+                    try {
+                        dbTripFuel.beginTransaction();
+
+                        tripFuel.stmtInsertIntoTableTripFuel(
+                                stmtTripFuel,
+                                System.currentTimeMillis() / 1000,
+                                ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
+                                45.5
+                        );
+
+                        dbTripFuel.setTransactionSuccessful();
+                    } finally {
+                        dbTripFuel.endTransaction();
+                    }
+                }
+
                 setConsumptionParams(cmdID, job.getCommand());
 
                 if (vv.findViewWithTag(cmdID) != null) {
@@ -465,6 +498,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         triplog = TripLog.getInstance(this.getApplicationContext());
 
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
+
+        tripFuel = new TripFuel(getBaseContext(), "Trip.db", null, 1);
+        dbTripFuel = tripFuel.getWritableDatabase();
+        stmtTripFuel = dbTripFuel.compileStatement(TripFuel.INSERT_INTO_TABLE_TRIP_FUEL);
     }
 
     @Override
@@ -472,6 +509,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         super.onStart();
         Log.d(TAG, "Entered onStart...");
         Log.d(TAG, "Verify permissions...");
+
 
         if (android.os.Build.VERSION.SDK_INT > 23) {
             if (hasPermissions(REQUEST_PERMISSIONS, this, Manifest.permission.ACCESS_FINE_LOCATION)) {
@@ -638,6 +676,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         doBindService();
 
         currentTrip = triplog.startTrip();
+
+
         if (currentTrip == null)
             showDialog(SAVE_TRIP_NOT_AVAILABLE);
 
@@ -794,7 +834,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void doBindService() {
         if (!isServiceBound) {
-            Log.d(TAG, "Binding OBD service..");
+            Log.d(TAG, "Binding OBD service...");
             if (preRequisites) {
                 btStatusTextView.setText(getString(R.string.status_bluetooth_connecting));
                 Intent serviceIntent = new Intent(this, ObdGatewayService.class);
