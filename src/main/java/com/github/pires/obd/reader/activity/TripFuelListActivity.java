@@ -12,9 +12,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 
 import com.github.pires.obd.reader.R;
-import com.github.pires.obd.reader.adapter.AdapterTripList;
-import com.github.pires.obd.reader.entity.EntityTripRecord;
-import com.github.pires.obd.reader.trips.TripLog;
+import com.github.pires.obd.reader.adapter.AdapterTripFuel;
+import com.github.pires.obd.reader.entity.EntityTripFuel;
+import com.github.pires.obd.reader.trips.TripFuel;
 
 import java.util.List;
 
@@ -27,9 +27,9 @@ import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
  */
 public class TripFuelListActivity extends Activity implements ConfirmDialog.Listener {
 
-    private List<EntityTripRecord> records;
-    private TripLog triplog = null;
-    private AdapterTripList adapter = null;
+    private List<EntityTripFuel> records;
+    private TripFuel tripfuel = null;
+    private AdapterTripFuel adapter = null;
 
     /// the currently selected row from the list of records
     private int selectedRow;
@@ -42,9 +42,9 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
 
         ListView lv = findViewById(R.id.tripList);
 
-        triplog = TripLog.getInstance(this.getApplicationContext());
-        records = triplog.readAllRecords();
-        adapter = new AdapterTripList(this, records);
+        tripfuel = TripFuel.getInstance(this.getApplicationContext());
+        records = tripfuel.readAllRecords();
+        adapter = new AdapterTripFuel(this, records);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
     }
@@ -102,12 +102,12 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         selectedRow = (int) info.id;
 
         // get record that is currently selected
-        EntityTripRecord record = records.get(selectedRow);
+        EntityTripFuel record = records.get(selectedRow);
     }
 
-    private void deleteTrip() {
+/*    private void deleteTrip() {
         // get the record to delete from our list of records
-        EntityTripRecord record = records.get(selectedRow);
+        EntityTripFuel record = records.get(selectedRow);
 
         // attempt to remove the record from the log
         if (triplog.deleteTrip(record.getID())) {
@@ -120,7 +120,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         } else {
             //Utilities.toast(this,getString(R.string.toast_delete_failed));
         }
-    }
+    }*/
 
     public boolean onContextItemSelected(MenuItem item) {
 
@@ -147,7 +147,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
      * Called when the user has selected a gasoline record to delete
      * from the log and has confirmed deletion.
      */
-    protected void deleteRow() {
+/*    protected void deleteRow() {
 
         // get the record to delete from our list of records
         EntityTripRecord record = records.get(selectedRow);
@@ -159,7 +159,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         } else {
             //Utilities.toast(this,getString(R.string.toast_delete_failed));
         }
-    }
+    }*/
 
     @Override
     public void onConfirmationDialogResponse(int id, boolean confirmed) {
@@ -168,7 +168,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
 
         switch (id) {
             case ConfirmDialog.DIALOG_CONFIRM_DELETE_ID:
-                deleteRow();
+                //deleteRow();
                 break;
 
             default:
