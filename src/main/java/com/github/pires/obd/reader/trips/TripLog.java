@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
+import com.github.pires.obd.reader.entity.EntityTripRecord;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -101,11 +103,11 @@ public class TripLog {
         }
     }
 
-    public TripRecord startTrip() {
+    public EntityTripRecord startTrip() {
         final String tag = TAG + ".createRecord()";
 
         try {
-            TripRecord record = new TripRecord();
+            EntityTripRecord record = new EntityTripRecord();
             long rowID = db.insertOrThrow(RECORDS_TABLE, null, getContentValues(record));
             record.setID((int) rowID);
             return record;
@@ -124,7 +126,7 @@ public class TripLog {
      * @param record - the TripRecord to update.
      * @return boolean flag indicating success/failure (true=success)
      */
-    public boolean updateRecord(TripRecord record) {
+    public boolean updateRecord(EntityTripRecord record) {
         final String tag = TAG + ".updateRecord()";
         ASSERT((record.getID() != null), tag, "record id cannot be null");
         boolean success = false;
@@ -150,7 +152,7 @@ public class TripLog {
      * @param record - the GasRecord to convert.
      * @return a ContentValues instance representing the specified GasRecord.
      */
-    private ContentValues getContentValues(TripRecord record) {
+    private ContentValues getContentValues(EntityTripRecord record) {
         ContentValues values = new ContentValues();
         values.put(RECORD_ID, record.getID());
         values.put(RECORD_START_DATE, record.getStartDate().getTime());
@@ -168,12 +170,12 @@ public class TripLog {
         db.execSQL(sql);
     }
 
-    public List<TripRecord> readAllRecords() {
+    public List<EntityTripRecord> readAllRecords() {
 
         //update();
 
         final String tag = TAG + ".readAllRecords()";
-        List<TripRecord> list = new ArrayList<>();
+        List<EntityTripRecord> list = new ArrayList<>();
         Cursor cursor = null;
 
         try {
@@ -191,7 +193,7 @@ public class TripLog {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
-                        TripRecord record = getRecordFromCursor(cursor);
+                        EntityTripRecord record = getRecordFromCursor(cursor);
                         list.add(record);
                     } while (cursor.moveToNext());
                 }
@@ -239,11 +241,11 @@ public class TripLog {
      * @param c - a Cursor containing results of a database query.
      * @return a GasRecord instance (null if no data).
      */
-    private TripRecord getRecordFromCursor(Cursor c) {
+    private EntityTripRecord getRecordFromCursor(Cursor c) {
         final String tag = TAG + ".getRecordFromCursor()";
-        TripRecord record = null;
+        EntityTripRecord record = null;
         if (c != null) {
-            record = new TripRecord();
+            record = new EntityTripRecord();
             int id = c.getInt(c.getColumnIndex(RECORD_ID));
             long startDate = c.getLong(c.getColumnIndex(RECORD_START_DATE));
             long endTime = c.getLong(c.getColumnIndex(RECORD_END_DATE));

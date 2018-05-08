@@ -54,6 +54,7 @@ import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.config.ObdConfig;
+import com.github.pires.obd.reader.entity.EntityTripRecord;
 import com.github.pires.obd.reader.io.AbstractGatewayService;
 import com.github.pires.obd.reader.io.LogCSVWriter;
 import com.github.pires.obd.reader.io.MockObdGatewayService;
@@ -64,7 +65,6 @@ import com.github.pires.obd.reader.net.ObdReading;
 import com.github.pires.obd.reader.net.ObdService;
 import com.github.pires.obd.reader.trips.TripFuel;
 import com.github.pires.obd.reader.trips.TripLog;
-import com.github.pires.obd.reader.trips.TripRecord;
 import com.github.pires.obd.reader.util.CalcOBD2;
 
 import java.io.FileNotFoundException;
@@ -106,8 +106,17 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int NO_GPS_SUPPORT = 9;
     private static final int TRIPS_LIST = 10;
     private static final int SAVE_TRIP_NOT_AVAILABLE = 11;
-    private static final int REQUEST_ENABLE_BT = 1234;
-    private static final int REQUEST_PERMISSIONS = 451;
+
+    private static final int FUEL_LIST = 12;
+    private static final int REQUEST_ENABLE_BT = 13;
+    private static final int REQUEST_PERMISSIONS = 14;
+
+
+
+
+
+
+
     public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
     /*    static {
@@ -127,7 +136,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private Location mLastLocation;
     /// the trip log
     private TripLog triplog;
-    private TripRecord currentTrip;
+    private EntityTripRecord currentTrip;
 
     private String consumptionResult = "0,00 km/l";
     private String consumptionAverage = "0,00 km/l";
@@ -706,6 +715,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         menu.add(0, GET_DTC, 0, getString(R.string.menu_get_dtc));
         menu.add(0, TRIPS_LIST, 0, getString(R.string.menu_trip_list));
         menu.add(0, SETTINGS, 0, getString(R.string.menu_settings));
+        menu.add(0, FUEL_LIST, 0, getString(R.string.menu_fuel_list));
         return true;
     }
 
@@ -725,6 +735,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 return true;
             case TRIPS_LIST:
                 startActivity(new Intent(this, TripListActivity.class));
+                return true;
+            case FUEL_LIST:
+                startActivity(new Intent(this, TripFuelListActivity.class));
                 return true;
         }
         return false;

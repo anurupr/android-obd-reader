@@ -48,6 +48,11 @@
             android:label="@string/title_activity_trips_list"
             android:launchMode="singleInstance" />
 
+        <activity
+            android:name="com.github.pires.obd.reader.activity.TripFuelListActivity"
+            android:label="@string/title_activity_trips_fuel_list"
+            android:launchMode="singleInstance" />
+
         <service
             android:name="com.github.pires.obd.reader.io.ObdGatewayService"
             android:exported="false"

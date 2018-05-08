@@ -1,4 +1,4 @@
-package com.github.pires.obd.reader.trips;
+package com.github.pires.obd.reader.adapter;
 
 import android.app.Activity;
 import android.view.LayoutInflater;
@@ -8,16 +8,18 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
 import com.github.pires.obd.reader.R;
+import com.github.pires.obd.reader.entity.EntityTripRecord;
 
 import java.util.Date;
 import java.util.List;
 
-public class TripListAdapter extends ArrayAdapter<TripRecord> {
+public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
+
     /// the Android Activity owning the ListView
     private final Activity activity;
 
     /// a list of trip records for display
-    private final List<TripRecord> records;
+    private final List<EntityTripRecord> records;
 
     /**
      * DESCRIPTION:
@@ -26,7 +28,7 @@ public class TripListAdapter extends ArrayAdapter<TripRecord> {
      * @param activity - the Android Activity instance that owns the ListView.
      * @param records  - the List of TripRecord instances for display in the ListView.
      */
-    public TripListAdapter(Activity activity, List<TripRecord> records) {
+    public AdapterTripList(Activity activity, List<EntityTripRecord> records) {
         super(activity, R.layout.row_trip_list, records);
         this.activity = activity;
         this.records = records;
@@ -49,13 +51,13 @@ public class TripListAdapter extends ArrayAdapter<TripRecord> {
         }
 
         // get widgets from the view
-        TextView startDate = (TextView) view.findViewById(R.id.startDate);
-        TextView columnDuration = (TextView) view.findViewById(R.id.columnDuration);
-        TextView rowEngine = (TextView) view.findViewById(R.id.rowEngine);
-        TextView rowOther = (TextView) view.findViewById(R.id.rowOther);
+        TextView startDate = view.findViewById(R.id.startDate);
+        TextView columnDuration = view.findViewById(R.id.columnDuration);
+        TextView rowEngine = view.findViewById(R.id.rowEngine);
+        TextView rowOther = view.findViewById(R.id.rowOther);
 
         // populate row widgets from record data
-        TripRecord record = records.get(position);
+        EntityTripRecord record = records.get(position);
 
         // date
         startDate.setText(record.getStartDateString());

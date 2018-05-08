@@ -25,8 +25,7 @@ import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
 /**
  * Some code taken from https://github.com/wdkapps/FillUp
  */
-
-public class TripListActivity extends Activity implements ConfirmDialog.Listener {
+public class TripFuelListActivity extends Activity implements ConfirmDialog.Listener {
 
     private List<EntityTripRecord> records;
     private TripLog triplog = null;
@@ -51,7 +50,7 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
     }
 
     /**
-     * Set up the {@link android.app.ActionBar}, if the API is available.
+     * Set up the {@link ActionBar}, if the API is available.
      */
     private void setupActionBar() {
         ActionBar actionBar = getActionBar();
