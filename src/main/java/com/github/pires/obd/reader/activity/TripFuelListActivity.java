@@ -16,6 +16,7 @@ import com.github.pires.obd.reader.adapter.AdapterTripFuel;
 import com.github.pires.obd.reader.entity.EntityTripFuel;
 import com.github.pires.obd.reader.trips.TripFuel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
@@ -28,6 +29,8 @@ import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
 public class TripFuelListActivity extends Activity implements ConfirmDialog.Listener {
 
     private List<EntityTripFuel> records;
+    private List<EntityTripFuel> temp;
+
     private TripFuel tripfuel = null;
     private AdapterTripFuel adapter = null;
 
@@ -43,7 +46,37 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         ListView lv = findViewById(R.id.tripList);
 
         tripfuel = TripFuel.getInstance(this.getApplicationContext());
-        records = tripfuel.readAllRecords();
+        temp = tripfuel.readAllRecords();
+
+
+        records = new ArrayList<>();
+
+        long lastTime = 0;
+        double lastInput = 0;
+        boolean abasteceu = false;
+
+
+        for (EntityTripFuel trip : temp) {
+
+            if (trip.getInputFuel() > lastInput) {
+                lastTime = trip.getTimeStamp();
+                lastInput = trip.getInputFuel();
+                abasteceu = false;
+            } else if (trip.getInputFuel() < lastInput && !abasteceu) {
+                abasteceu = true;
+
+                System.out.println(" - - - - - - - - - - - - - - - - - -");
+                System.out.println("lastTime: " + lastTime);
+                System.out.println("lastInput: " + lastInput);
+
+                lastTime = trip.getTimeStamp();
+                lastInput = trip.getInputFuel();
+
+                records.add(trip);
+            }
+        }
+
+
         adapter = new AdapterTripFuel(this, records);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);

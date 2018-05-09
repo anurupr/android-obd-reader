@@ -1,6 +1,7 @@
 package com.github.pires.obd.reader.adapter;
 
 import android.app.Activity;
+import android.text.format.DateFormat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,7 +11,9 @@ import android.widget.TextView;
 import com.github.pires.obd.reader.R;
 import com.github.pires.obd.reader.entity.EntityTripFuel;
 
+import java.util.Calendar;
 import java.util.List;
+import java.util.Locale;
 
 public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
 
@@ -59,11 +62,17 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         EntityTripFuel record = records.get(position);
 
         // date
-        startDate.setText(record.getInputFuel() + " %");
-        columnDuration.setText(record.getTimeStamp() + "");
-        rowEngine.setText("Lat Long");
+        rowEngine.setText(String.format("%.2f", record.getInputFuel()) + "%");
+        //columnDuration.setText(getDate(record.getTimeStamp()));
+        startDate.setText(getDate(record.getTimeStamp()));
 
         return view;
+    }
+
+    private String getDate(long time) {
+        Calendar cal = Calendar.getInstance(Locale.ENGLISH);
+        cal.setTimeInMillis(time * 1000);
+        return DateFormat.format("dd-MM-yyyy HH:mm:ss", cal).toString();
     }
 
 /*    private String calcDiffTime(Date start, Date end) {

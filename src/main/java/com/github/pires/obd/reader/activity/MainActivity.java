@@ -106,16 +106,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int NO_GPS_SUPPORT = 9;
     private static final int TRIPS_LIST = 10;
     private static final int SAVE_TRIP_NOT_AVAILABLE = 11;
-
     private static final int FUEL_LIST = 12;
     private static final int REQUEST_ENABLE_BT = 13;
     private static final int REQUEST_PERMISSIONS = 14;
-
-
-
-
-
-
 
     public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
@@ -443,6 +436,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             paramTankCapacity = correntTankCapacity;
 
             try {
+
                 dbTripFuel.beginTransaction();
 
                 tripFuel.stmtInsertIntoTableTripFuel(
@@ -453,8 +447,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 );
 
                 dbTripFuel.setTransactionSuccessful();
+
             } finally {
-                dbTripFuel.endTransaction();
+
+                if (dbTripFuel != null && dbTripFuel.inTransaction()) {
+                    dbTripFuel.endTransaction();
+                }
+
             }
         }
     }
