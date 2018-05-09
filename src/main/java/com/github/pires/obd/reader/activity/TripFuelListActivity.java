@@ -54,6 +54,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
      */
     private void setupActionBar() {
         ActionBar actionBar = getActionBar();
+
         if (actionBar != null) {
             // Show the Up button in the action bar.
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -164,6 +165,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
     @Override
     public void onConfirmationDialogResponse(int id, boolean confirmed) {
         removeDialog(id);
+
         if (!confirmed) return;
 
         switch (id) {

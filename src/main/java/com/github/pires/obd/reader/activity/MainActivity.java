@@ -341,8 +341,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 Log.e("***************", "***************");
 
-
-
                     /*
                     Toast.makeText(
                             getBaseContext(),
@@ -573,7 +571,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
 
-        tripFuel = new TripFuel(getBaseContext(), "Trip.db", null, 1);
+        tripFuel = TripFuel.getInstance(getBaseContext());
         dbTripFuel = tripFuel.getWritableDatabase();
         stmtTripFuel = dbTripFuel.compileStatement(TripFuel.INSERT_INTO_TABLE_TRIP_FUEL);
     }
@@ -878,7 +876,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     }
 
     private void addTableRow(String id, String key, String val) {
-
         TableRow tr = new TableRow(this);
         MarginLayoutParams params = new ViewGroup.MarginLayoutParams(
                 LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT);

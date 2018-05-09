@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.pires.obd.reader.entity.EntityTripFuel;
 
@@ -53,6 +54,9 @@ public class TripFuel extends SQLiteOpenHelper {
             TRIP_FUEL_INPUT,
             TRIP_FUEL_TANK_CAPACITY
     };
+
+    private static Context mContext;
+
     /// singleton instance
     private static TripFuel instance;
 
@@ -67,6 +71,10 @@ public class TripFuel extends SQLiteOpenHelper {
      * @return GasLog - singleton instance.
      */
     public static TripFuel getInstance(Context context) {
+
+        mContext = context;
+
+
         if (instance == null) {
             instance = new TripFuel(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -99,6 +107,15 @@ public class TripFuel extends SQLiteOpenHelper {
 
     public List<EntityTripFuel> readAllRecords() {
 
+        Toast.makeText(
+                mContext,
+                "readAllRecords",
+                Toast.LENGTH_SHORT
+        ).show();
+
+
+        Log.i("readAllRecords", "readAllRecords");
+
         //update();
 
         final String tag = TAG + ".readAllRecords()";
@@ -122,6 +139,10 @@ public class TripFuel extends SQLiteOpenHelper {
                 if (cursor.moveToFirst()) {
                     do {
                         EntityTripFuel record = getRecordFromCursor(cursor);
+
+                        Log.i("record", "###" + record.toString());
+
+
                         list.add(record);
                     } while (cursor.moveToNext());
                 }
