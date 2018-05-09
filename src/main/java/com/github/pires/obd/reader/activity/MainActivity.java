@@ -112,9 +112,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
-    /*    static {
-            RoboGuice.setUseAnnotationDatabases(false);
-        }*/
+    /*
+    static {
+        RoboGuice.setUseAnnotationDatabases(false);
+    }
+    */
     public Map<String, String> commandResult = new HashMap<>();
     boolean mGpsIsStarted = false;
 
@@ -357,17 +359,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }
     }
 
-    private double calcConsumption(long timeStamp, float fuelInput, float tank) {
+/*    private double calcConsumption(long timeStamp, float fuelInput, float tank) {
 
         Toast.makeText(
                 getBaseContext(),
                 "fuelInput: " + fuelInput,
                 Toast.LENGTH_SHORT
         ).show();
-
-/*        if (paramFuelInput < fuelInput) {
-            return -1;
-        }*/
 
         double consumption = ((tank * (paramFuelInput - fuelInput)) / (timeStamp - paramTimeStamp)) * 3600;
 
@@ -378,7 +376,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         ).show();
 
         return consumption;
-    }
+    }*/
 
 
     private void setConsumptionParams(String cmdID, ObdCommand cmd) {
@@ -409,10 +407,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             Log.e("correntFuelInput", "@@@" + correntFuelInput);
             Log.e("correntTankCapacity", "@@@" + correntTankCapacity);
 
-            double consumption =
-                    calcConsumption(correntTimeStamp, correntFuelInput, correntTankCapacity);
+/*            double consumption =
+                    calcConsumption(correntTimeStamp, correntFuelInput, correntTankCapacity);*/
 
-            if (consumption >= 0) {
+/*            if (consumption >= 0) {
                 TextView existingTV;
 
                 consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
@@ -429,7 +427,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 existingTV = vv.findViewWithTag("AVERAGE");
                 existingTV.setText(consumptionAverage);
-            }
+            }*/
+
+            calcConsumption(CalcOBD2.Fuel.E27);
 
             paramTimeStamp = correntTimeStamp;
             paramFuelInput = correntFuelInput;
@@ -449,18 +449,16 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 dbTripFuel.setTransactionSuccessful();
 
             } finally {
-
                 if (dbTripFuel != null && dbTripFuel.inTransaction()) {
                     dbTripFuel.endTransaction();
                 }
-
             }
         }
     }
 
-/*    private void calcConsumption(CalcOBD2.Fuel fuel) {
+    private void calcConsumption(CalcOBD2.Fuel fuel) {
 
-        //double consumption = 0;
+        double consumption = 0;
 
         int bhp = Integer.parseInt(prefs.getString("engine_horse_power_preference", "-1"));
 
@@ -490,7 +488,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         existingTV = vv.findViewWithTag("AVERAGE");
         existingTV.setText(consumptionAverage);
-    }*/
+    }
+
 
     @SuppressLint("MissingPermission")
     private void gpsInit() {
@@ -711,8 +710,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         menu.add(0, STOP_LIVE_DATA, 0, getString(R.string.menu_stop_live_data));
         menu.add(0, GET_DTC, 0, getString(R.string.menu_get_dtc));
         menu.add(0, TRIPS_LIST, 0, getString(R.string.menu_trip_list));
-        menu.add(0, SETTINGS, 0, getString(R.string.menu_settings));
         menu.add(0, FUEL_LIST, 0, getString(R.string.menu_fuel_list));
+        menu.add(0, SETTINGS, 0, getString(R.string.menu_settings));
+
         return true;
     }
 
@@ -854,6 +854,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         MenuItem startItem = menu.findItem(START_LIVE_DATA);
         MenuItem stopItem = menu.findItem(STOP_LIVE_DATA);
         MenuItem TripsListItem = menu.findItem(TRIPS_LIST);
+        MenuItem TripsFuelListItem = menu.findItem(FUEL_LIST);
         MenuItem settingsItem = menu.findItem(SETTINGS);
         MenuItem getDTCItem = menu.findItem(GET_DTC);
 
@@ -862,12 +863,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             stopItem.setEnabled(true);
             getDTCItem.setEnabled(false);
             TripsListItem.setEnabled(false);
+            TripsFuelListItem.setEnabled(false);
             settingsItem.setEnabled(false);
         } else {
             stopItem.setEnabled(false);
             startItem.setEnabled(true);
             getDTCItem.setEnabled(true);
             TripsListItem.setEnabled(true);
+            TripsFuelListItem.setEnabled(true);
             settingsItem.setEnabled(true);
         }
 

@@ -39,6 +39,9 @@ public class CalcOBD2 {
 
         double massAirFlow = (bhp / 1.25) * (throttlePosition / 100);
 
+        // Eficiencia
+        massAirFlow = massAirFlow * 0.70;
+
         if (massAirFlow <= 0)
             return 0;
 
@@ -62,6 +65,9 @@ public class CalcOBD2 {
             return 0;
 
         double massAirFlow = (bhp / 1.25) * (rpm / 8000);
+
+        // Eficiencia
+        massAirFlow = massAirFlow * 0.70;
 
         if (massAirFlow <= 0)
             return 0;
