@@ -624,6 +624,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     @Override
     protected void onStop() {
         super.onStop();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
         if (mLocService != null) {
             mLocService.removeGpsStatusListener(this);
