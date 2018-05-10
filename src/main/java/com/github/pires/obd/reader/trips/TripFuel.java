@@ -7,7 +7,6 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.github.pires.obd.reader.entity.EntityTripFuel;
 
@@ -28,34 +27,34 @@ public class TripFuel extends SQLiteOpenHelper {
 
     private static final String TRIP_FUEL_TABLE_NAME = "TripFuel";
     private static final String TRIP_FUEL_TIME = "Time";
-    private static final String TRIP_FUEL_INPUT = "Input";
-    private static final String TRIP_FUEL_TANK_CAPACITY = "Tank";
+    private static final String TRIP_FUEL_PERCENT = "Percent";
+    private static final String TRIP_FUEL_LITERS = "Liters";
     //-- -----------------------------------------------------
     //   -- Create TableTripFuel
     //-- -----------------------------------------------------
     public static final String CREATE_TABLE_TRIP_FUEL =
             "CREATE TABLE IF NOT EXISTS " + TRIP_FUEL_TABLE_NAME + "(" +
                     TRIP_FUEL_TIME + " INTEGER NOT NULL," +
-                    TRIP_FUEL_INPUT + " REAL NOT NULL," +
-                    TRIP_FUEL_TANK_CAPACITY + " REAL NOT NULL," +
+                    TRIP_FUEL_PERCENT + " INTEGER NOT NULL," +
+                    TRIP_FUEL_LITERS + " INTEGER NOT NULL," +
                     "PRIMARY KEY (" + TRIP_FUEL_TIME + "));";
+
     //-- -----------------------------------------------------
     //   -- Insert TableFuel
     //-- -----------------------------------------------------
     public static final String INSERT_INTO_TABLE_TRIP_FUEL =
             "INSERT INTO " + TRIP_FUEL_TABLE_NAME + "(" +
                     TRIP_FUEL_TIME + "," +
-                    TRIP_FUEL_INPUT + "," +
-                    TRIP_FUEL_TANK_CAPACITY +
+                    TRIP_FUEL_PERCENT + "," +
+                    TRIP_FUEL_LITERS +
                     ") VALUES(?,?,?);";
+
     /// array of all column names for RECORDS_TABLE
     private static final String[] TRIP_FUEL_COLUMNS = new String[]{
             TRIP_FUEL_TIME,
-            TRIP_FUEL_INPUT,
-            TRIP_FUEL_TANK_CAPACITY
+            TRIP_FUEL_PERCENT,
+            TRIP_FUEL_LITERS
     };
-
-    private static Context mContext;
 
     /// singleton instance
     private static TripFuel instance;
@@ -71,10 +70,6 @@ public class TripFuel extends SQLiteOpenHelper {
      * @return GasLog - singleton instance.
      */
     public static TripFuel getInstance(Context context) {
-
-        mContext = context;
-
-
         if (instance == null) {
             instance = new TripFuel(context, DATABASE_NAME, null, DATABASE_VERSION);
         }
@@ -97,23 +92,16 @@ public class TripFuel extends SQLiteOpenHelper {
 
     }
 
-    public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, float input, float tank) {
+    public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, long percent, long liters) {
         stmt.bindLong(1, time);
-        stmt.bindDouble(2, input);
-        stmt.bindDouble(3, tank);
+        stmt.bindLong(2, percent);
+        stmt.bindLong(3, liters);
+
         stmt.execute();
         stmt.clearBindings();
     }
 
     public List<EntityTripFuel> readAllRecords() {
-
-        Toast.makeText(
-                mContext,
-                "readAllRecords",
-                Toast.LENGTH_SHORT
-        ).show();
-
-
         Log.i("readAllRecords", "readAllRecords");
 
         //update();
@@ -175,12 +163,12 @@ public class TripFuel extends SQLiteOpenHelper {
             record = new EntityTripFuel();
 
             long time = c.getLong(c.getColumnIndex(TRIP_FUEL_TIME));
-            double input = c.getDouble(c.getColumnIndex(TRIP_FUEL_INPUT));
-            double tank = c.getDouble(c.getColumnIndex(TRIP_FUEL_TANK_CAPACITY));
+            long percent = c.getLong(c.getColumnIndex(TRIP_FUEL_PERCENT));
+            long liters = c.getLong(c.getColumnIndex(TRIP_FUEL_LITERS));
 
-            record.setTimeStamp(time);
-            record.setInputFuel(input);
-            record.setTankCapacity(tank);
+            record.setTime(time);
+            record.setPercent(percent);
+            record.setLiters(liters);
         }
 
         return record;

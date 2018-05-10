@@ -52,25 +52,25 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         records = new ArrayList<>();
 
         long lastTime = 0;
-        double lastInput = 0;
+        long lastPercent = 0;
         boolean abasteceu = false;
 
 
         for (EntityTripFuel trip : temp) {
 
-            if (trip.getInputFuel() > lastInput) {
-                lastTime = trip.getTimeStamp();
-                lastInput = trip.getInputFuel();
+            if (trip.getPercent() > lastPercent) {
+                lastTime = trip.getTime();
+                lastPercent = trip.getPercent();
                 abasteceu = false;
-            } else if (trip.getInputFuel() < lastInput && !abasteceu) {
+            } else if (trip.getPercent() < lastPercent && !abasteceu) {
                 abasteceu = true;
 
                 System.out.println(" - - - - - - - - - - - - - - - - - -");
                 System.out.println("lastTime: " + lastTime);
-                System.out.println("lastInput: " + lastInput);
+                System.out.println("lastInput: " + lastPercent);
 
-                lastTime = trip.getTimeStamp();
-                lastInput = trip.getInputFuel();
+                lastTime = trip.getTime();
+                lastPercent = trip.getPercent();
 
                 records.add(trip);
             }

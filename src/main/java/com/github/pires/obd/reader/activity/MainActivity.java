@@ -133,12 +133,12 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private TripLog triplog;
     private EntityTripRecord currentTrip;
 
-    private String consumptionResult = "0,00 km/l";
-    private String consumptionAverage = "0,00 km/l";
+    private String consumptionResult = "0,0 km/l";
+    private String consumptionAverage = "0,0 km/l";
 
-    private long paramTimeStamp = 0;
-    private float paramFuelInput = 0;
-    private float paramTankCapacity = 0;
+    private long paramFuelTime = 0;
+    private long paramFuelPercent = 0;
+    private long paramFuelLiters = 0;
 
     private double consumptionSum = 0.0;
     private int consumptionCount = 0;
@@ -399,13 +399,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             //calcConsumption(fuelType); "FUEL_LEVEL"
         } else if (cmdID.equals("FUEL_LEVEL")) {
 
-            long correntTimeStamp = System.currentTimeMillis() / 1000;
-            float correntFuelInput = ((FuelLevelCommand) cmd).getFuelLevel();
-            float correntTankCapacity = Float.parseFloat(prefs.getString("fuel_tank_preference", "0"));
+            long correntFuelTime = System.currentTimeMillis() / 1000;
+            long correntFuelPercent = (long) ((FuelLevelCommand) cmd).getFuelLevel();
+            long correntFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
 
-            Log.e("correntTimeStamp", "@@@" + correntTimeStamp);
-            Log.e("correntFuelInput", "@@@" + correntFuelInput);
-            Log.e("correntTankCapacity", "@@@" + correntTankCapacity);
+            Log.e("correntFuelTime", "@@@" + correntFuelTime);
+            Log.e("correntFuelPercent", "@@@" + correntFuelPercent);
+            Log.e("correntFuelLiters", "@@@" + correntFuelLiters);
 
 /*            double consumption =
                     calcConsumption(correntTimeStamp, correntFuelInput, correntTankCapacity);*/
@@ -431,19 +431,21 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
             calcConsumption(CalcOBD2.Fuel.E27);
 
-            paramTimeStamp = correntTimeStamp;
-            paramFuelInput = correntFuelInput;
-            paramTankCapacity = correntTankCapacity;
+            paramFuelTime = correntFuelTime;
+            paramFuelPercent = correntFuelPercent;
+            paramFuelLiters = correntFuelLiters;
 
             try {
+
+                paramFuelPercent = (long) (Math.round(paramFuelPercent * 100.0) / 100.0);
 
                 dbTripFuel.beginTransaction();
 
                 tripFuel.stmtInsertIntoTableTripFuel(
                         stmtTripFuel,
-                        paramTimeStamp,
-                        paramFuelInput,
-                        paramTankCapacity
+                        paramFuelTime,
+                        paramFuelPercent,
+                        paramFuelLiters
                 );
 
                 dbTripFuel.setTransactionSuccessful();
@@ -474,7 +476,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         TextView existingTV;
 
-        consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
+        consumptionResult = new DecimalFormat("0.0").format(consumption) + "km/l";
 
         existingTV = vv.findViewWithTag("CONSUMPTION");
         existingTV.setText(consumptionResult);
@@ -483,7 +485,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         consumptionCount += 1;
 
         consumptionAverage =
-                new DecimalFormat("0.00").format(
+                new DecimalFormat("0.0").format(
                         CalcOBD2.getAverage(consumptionSum, consumptionCount)) + "km/l";
 
         existingTV = vv.findViewWithTag("AVERAGE");

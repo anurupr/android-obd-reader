@@ -62,9 +62,9 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         EntityTripFuel record = records.get(position);
 
         // date
-        rowEngine.setText(String.format("%.2f", record.getInputFuel()) + "%");
+        rowEngine.setText(String.format("%.2f", record.getPercent()) + "%");
         //columnDuration.setText(getDate(record.getTimeStamp()));
-        startDate.setText(getDate(record.getTimeStamp()));
+        startDate.setText(getDate(record.getTime()));
 
         return view;
     }

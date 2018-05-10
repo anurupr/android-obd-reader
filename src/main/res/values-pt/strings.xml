@@ -11,7 +11,7 @@
     <string name="menu_start_live_data">Iniciar monitoramento em tempo real</string>
     <string name="menu_stop_live_data">Parar monitoramento em tempo real</string>
     <string name="menu_trip_list">Viagens</string>
-    <string name="menu_fuel_list">Abastecimento</string>
+    <string name="menu_fuel_list">Abastecimentos</string>
     <string name="notification_action">Toque para abrir OBD-Reader</string>
     <string name="notification_label">Toque para abrir OBD-Reader.</string>
     <string name="pref_bluetooth_list_devices_summary">Lista de dispositivos bluetooth pareados.</string>

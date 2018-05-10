@@ -6,31 +6,31 @@ package com.github.pires.obd.reader.entity;
 
 public class EntityTripFuel {
 
-    private long timeStamp;
-    private double inputFuel;
-    private double tankCapacity;
+    private long time;
+    private long percent;
+    private long liters;
 
-    public long getTimeStamp() {
-        return timeStamp;
+    public long getTime() {
+        return time;
     }
 
-    public void setTimeStamp(long timeStamp) {
-        this.timeStamp = timeStamp;
+    public void setTime(long time) {
+        this.time = time;
     }
 
-    public double getInputFuel() {
-        return inputFuel;
+    public long getPercent() {
+        return percent;
     }
 
-    public void setInputFuel(double inputFuel) {
-        this.inputFuel = inputFuel;
+    public void setPercent(long percent) {
+        this.percent = percent;
     }
 
-    public double getTankCapacity() {
-        return tankCapacity;
+    public long getLiters() {
+        return liters;
     }
 
-    public void setTankCapacity(double tankCapacity) {
-        this.tankCapacity = tankCapacity;
+    public void setLiters(long liters) {
+        this.liters = liters;
     }
 }
