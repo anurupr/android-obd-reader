@@ -62,7 +62,7 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         EntityTripFuel record = records.get(position);
 
         // date
-        rowEngine.setText(String.format("%.2f", record.getPercent()) + "%");
+        rowEngine.setText(record.getPercent() + "%");
         //columnDuration.setText(getDate(record.getTimeStamp()));
         startDate.setText(getDate(record.getTime()));
 
@@ -72,7 +72,7 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
     private String getDate(long time) {
         Calendar cal = Calendar.getInstance(Locale.ENGLISH);
         cal.setTimeInMillis(time * 1000);
-        return DateFormat.format("dd-MM-yyyy HH:mm:ss", cal).toString();
+        return DateFormat.format("dd/MM/yyyy HH:mm:ss", cal).toString();
     }
 
 /*    private String calcDiffTime(Date start, Date end) {

@@ -140,6 +140,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private long paramFuelPercent = 0;
     private long paramFuelLiters = 0;
 
+    private long paramFuelPercentSum = 0;
+    private long paramFuelPercentCount = 0;
+
     private double consumptionSum = 0.0;
     private int consumptionCount = 0;
 
@@ -432,27 +435,38 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             calcConsumption(CalcOBD2.Fuel.E27);
 
             paramFuelTime = correntFuelTime;
-            paramFuelPercent = correntFuelPercent;
+            paramFuelPercentSum += (long) (Math.round(correntFuelPercent * 100.0) / 100.0);
+            paramFuelPercentCount++;
             paramFuelLiters = correntFuelLiters;
 
-            try {
+            Toast.makeText(
+                    getBaseContext(),
+                    "paramFuelPercent: " + paramFuelPercent,
+                    Toast.LENGTH_SHORT
+            ).show();
 
-                paramFuelPercent = (long) (Math.round(paramFuelPercent * 100.0) / 100.0);
+            if (paramFuelPercentCount > 10) {
+                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
 
-                dbTripFuel.beginTransaction();
+                if (tempFuelPercent > (paramFuelPercent * 1.05)) {
+                    try {
+                        dbTripFuel.beginTransaction();
 
-                tripFuel.stmtInsertIntoTableTripFuel(
-                        stmtTripFuel,
-                        paramFuelTime,
-                        paramFuelPercent,
-                        paramFuelLiters
-                );
+                        tripFuel.stmtInsertIntoTableTripFuel(
+                                stmtTripFuel,
+                                paramFuelTime,
+                                paramFuelPercent,
+                                paramFuelLiters
+                        );
 
-                dbTripFuel.setTransactionSuccessful();
+                        dbTripFuel.setTransactionSuccessful();
+                        paramFuelPercent = tempFuelPercent;
 
-            } finally {
-                if (dbTripFuel != null && dbTripFuel.inTransaction()) {
-                    dbTripFuel.endTransaction();
+                    } finally {
+                        if (dbTripFuel != null && dbTripFuel.inTransaction()) {
+                            dbTripFuel.endTransaction();
+                        }
+                    }
                 }
             }
         }

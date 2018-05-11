@@ -16,7 +16,6 @@ import com.github.pires.obd.reader.adapter.AdapterTripFuel;
 import com.github.pires.obd.reader.entity.EntityTripFuel;
 import com.github.pires.obd.reader.trips.TripFuel;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import static com.github.pires.obd.reader.activity.ConfirmDialog.createDialog;
@@ -49,7 +48,9 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
         temp = tripfuel.readAllRecords();
 
 
-        records = new ArrayList<>();
+        records = temp;
+
+/*        records = new ArrayList<>();
 
         long lastTime = 0;
         long lastPercent = 0;
@@ -74,7 +75,7 @@ public class TripFuelListActivity extends Activity implements ConfirmDialog.List
 
                 records.add(trip);
             }
-        }
+        }*/
 
 
         adapter = new AdapterTripFuel(this, records);
