@@ -56,7 +56,7 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         TextView startDate = view.findViewById(R.id.startDate);
         TextView columnDuration = view.findViewById(R.id.columnDuration);
         TextView rowEngine = view.findViewById(R.id.rowEngine);
-        //TextView rowOther = view.findViewById(R.id.rowOther);
+        TextView rowOther = view.findViewById(R.id.rowOther);
 
         // populate row widgets from record data
         EntityTripFuel record = records.get(position);
@@ -65,6 +65,7 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         rowEngine.setText(record.getPercent() + "%");
         //columnDuration.setText(getDate(record.getTimeStamp()));
         startDate.setText(getDate(record.getTime()));
+        rowOther.setText((record.getLiters() * (record.getPercent() / 100.0)) + "L");
 
         return view;
     }

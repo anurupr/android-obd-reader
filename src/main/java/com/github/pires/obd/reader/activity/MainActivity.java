@@ -111,6 +111,15 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int REQUEST_ENABLE_BT = 13;
     private static final int REQUEST_PERMISSIONS = 14;
 
+    // 1 minute
+    // 60000
+
+    // 5 minutes
+    // 300000
+
+    private final long TIME_INTERVAL = 300000;
+    //private final long TIME_INTERVAL = 60000;
+
     public static boolean hasPermissionGps = false;
     private static boolean bluetoothDefaultIsEnable = false;
     /*
@@ -137,6 +146,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private String consumptionResult = "0,0 km/l";
     private String consumptionAverage = "0,0 km/l";
 
+    private long paramFuelTimeInterval = 0;
     private long paramFuelTime = 0;
     private long paramFuelPercent = 0;
     private long paramFuelLiters = 0;
@@ -410,28 +420,34 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void calcFuelSupply(ObdCommand cmd) {
 
-        long correntFuelTime = System.currentTimeMillis() / 1000;
+        long correntFuelTime = System.currentTimeMillis();
         long correntFuelPercent = (long) ((FuelLevelCommand) cmd).getFuelLevel();
         long correntFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
+
+/*        Toast.makeText(
+                getBaseContext(),
+                "FuelLiters: " + correntFuelLiters,
+                Toast.LENGTH_SHORT
+        ).show();*/
 
         paramFuelTime = correntFuelTime;
         paramFuelPercentSum += (long) (Math.round(correntFuelPercent * 100.0) / 100.0);
         paramFuelPercentCount++;
         paramFuelLiters = correntFuelLiters;
 
-        Toast.makeText(
+/*        Toast.makeText(
                 getBaseContext(),
-                "paramFuelPercent: " + paramFuelPercent,
+                "paramFuelTime: " + paramFuelTime,
                 Toast.LENGTH_SHORT
-        ).show();
+        ).show();*/
 
-        if (paramFuelPercentCount > 10) {
+        if (paramFuelPercentCount > 5) {
 
             if (paramFuelPercent == 0) {
                 Cursor c = tripFuel.queryLastFuel();
 
                 while (c.moveToNext()) {
-                    paramFuelTime = c.getLong(0);
+                    paramFuelTime = c.getLong(0) * 1000;
                     paramFuelPercent = c.getLong(1);
                     paramFuelLiters = c.getLong(2);
 
@@ -443,33 +459,48 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 c.close();
             }
 
-            long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
+            if (paramFuelTime > paramFuelTimeInterval) {
 
-            if (tempFuelPercent > (paramFuelPercent * 1.05)) {
+                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
 
-                SQLiteDatabase db = tripFuel.getWritableDatabase();
+                Toast.makeText(
+                        getBaseContext(),
+                        "ENTROU: " + paramFuelTime,
+                        Toast.LENGTH_SHORT
+                ).show();
 
-                try {
-                    db.beginTransaction();
+                if (tempFuelPercent > (paramFuelPercent * 1.05)) {
 
-                    tripFuel.stmtInsertIntoTableTripFuel(
-                            stmtTripFuel,
-                            paramFuelTime,
-                            paramFuelPercent,
-                            paramFuelLiters
-                    );
+                    SQLiteDatabase db = tripFuel.getWritableDatabase();
 
-                    db.setTransactionSuccessful();
-                    paramFuelPercent = tempFuelPercent;
+                    try {
+                        db.beginTransaction();
 
-                } finally {
-                    if (db != null && db.inTransaction()) {
-                        db.endTransaction();
+                        tripFuel.stmtInsertIntoTableTripFuel(
+                                stmtTripFuel,
+                                paramFuelTime / 1000,
+                                paramFuelPercent,
+                                paramFuelLiters
+                        );
+
+                        db.setTransactionSuccessful();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        paramFuelPercent = tempFuelPercent;
+                        paramFuelPercentSum = 0;
+                        paramFuelPercentCount = 0;
+                        paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
+
+                        if (db != null && db.inTransaction()) {
+                            db.endTransaction();
+                        }
                     }
                 }
             }
         }
     }
+
 
     private void calcConsumption(CalcOBD2.Fuel fuel) {
 
@@ -882,8 +913,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             startItem.setEnabled(false);
             stopItem.setEnabled(true);
             getDTCItem.setEnabled(false);
-            TripsListItem.setEnabled(false);
-            TripsFuelListItem.setEnabled(false);
+            TripsListItem.setEnabled(true);
+            TripsFuelListItem.setEnabled(true);
             settingsItem.setEnabled(false);
         } else {
             stopItem.setEnabled(true);
