@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.hardware.Sensor;
@@ -147,7 +148,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private int consumptionCount = 0;
 
     private TripFuel tripFuel;
-    private SQLiteDatabase dbTripFuel;
+    //private SQLiteDatabase dbTripFuel;
     private SQLiteStatement stmtTripFuel;
 
     //private List<Double> consumptionList = new ArrayList<>();
@@ -399,73 +400,71 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     prefs.getString("fuel_type_preference", "E27")
             );
 
-            //calcConsumption(fuelType); "FUEL_LEVEL"
+            calcConsumption(fuelType);
+
         } else if (cmdID.equals("FUEL_LEVEL")) {
+            calcFuelSupply(cmd);
+        }
+    }
 
-            long correntFuelTime = System.currentTimeMillis() / 1000;
-            long correntFuelPercent = (long) ((FuelLevelCommand) cmd).getFuelLevel();
-            long correntFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
 
-            Log.e("correntFuelTime", "@@@" + correntFuelTime);
-            Log.e("correntFuelPercent", "@@@" + correntFuelPercent);
-            Log.e("correntFuelLiters", "@@@" + correntFuelLiters);
+    private void calcFuelSupply(ObdCommand cmd) {
 
-/*            double consumption =
-                    calcConsumption(correntTimeStamp, correntFuelInput, correntTankCapacity);*/
+        long correntFuelTime = System.currentTimeMillis() / 1000;
+        long correntFuelPercent = (long) ((FuelLevelCommand) cmd).getFuelLevel();
+        long correntFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
 
-/*            if (consumption >= 0) {
-                TextView existingTV;
+        paramFuelTime = correntFuelTime;
+        paramFuelPercentSum += (long) (Math.round(correntFuelPercent * 100.0) / 100.0);
+        paramFuelPercentCount++;
+        paramFuelLiters = correntFuelLiters;
 
-                consumptionResult = new DecimalFormat("0.00").format(consumption) + "km/l";
+        Toast.makeText(
+                getBaseContext(),
+                "paramFuelPercent: " + paramFuelPercent,
+                Toast.LENGTH_SHORT
+        ).show();
 
-                existingTV = vv.findViewWithTag("CONSUMPTION");
-                existingTV.setText(consumptionResult);
+        if (paramFuelPercentCount > 10) {
 
-                consumptionSum += consumption;
-                consumptionCount += 1;
+            if (paramFuelPercent == 0) {
+                Cursor c = tripFuel.queryLastFuel();
 
-                consumptionAverage =
-                        new DecimalFormat("0.00").format(
-                                CalcOBD2.getAverage(consumptionSum, consumptionCount)) + "km/l";
+                while (c.moveToNext()) {
+                    paramFuelTime = c.getLong(0);
+                    paramFuelPercent = c.getLong(1);
+                    paramFuelLiters = c.getLong(2);
 
-                existingTV = vv.findViewWithTag("AVERAGE");
-                existingTV.setText(consumptionAverage);
-            }*/
+                    Log.e("cursorFuelTime", "@@@" + paramFuelTime);
+                    Log.e("cursorFuelPercent", "@@@" + paramFuelPercent);
+                    Log.e("cursorFuelLiters", "@@@" + paramFuelLiters);
+                }
 
-            calcConsumption(CalcOBD2.Fuel.E27);
+                c.close();
+            }
 
-            paramFuelTime = correntFuelTime;
-            paramFuelPercentSum += (long) (Math.round(correntFuelPercent * 100.0) / 100.0);
-            paramFuelPercentCount++;
-            paramFuelLiters = correntFuelLiters;
+            long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
 
-            Toast.makeText(
-                    getBaseContext(),
-                    "paramFuelPercent: " + paramFuelPercent,
-                    Toast.LENGTH_SHORT
-            ).show();
+            if (tempFuelPercent > (paramFuelPercent * 1.05)) {
 
-            if (paramFuelPercentCount > 10) {
-                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
+                SQLiteDatabase db = tripFuel.getWritableDatabase();
 
-                if (tempFuelPercent > (paramFuelPercent * 1.05)) {
-                    try {
-                        dbTripFuel.beginTransaction();
+                try {
+                    db.beginTransaction();
 
-                        tripFuel.stmtInsertIntoTableTripFuel(
-                                stmtTripFuel,
-                                paramFuelTime,
-                                paramFuelPercent,
-                                paramFuelLiters
-                        );
+                    tripFuel.stmtInsertIntoTableTripFuel(
+                            stmtTripFuel,
+                            paramFuelTime,
+                            paramFuelPercent,
+                            paramFuelLiters
+                    );
 
-                        dbTripFuel.setTransactionSuccessful();
-                        paramFuelPercent = tempFuelPercent;
+                    db.setTransactionSuccessful();
+                    paramFuelPercent = tempFuelPercent;
 
-                    } finally {
-                        if (dbTripFuel != null && dbTripFuel.inTransaction()) {
-                            dbTripFuel.endTransaction();
-                        }
+                } finally {
+                    if (db != null && db.inTransaction()) {
+                        db.endTransaction();
                     }
                 }
             }
@@ -509,7 +508,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     @SuppressLint("MissingPermission")
     private void gpsInit() {
-
         if (hasPermissionGps) {
             mLocService = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
             if (mLocService != null) {
@@ -586,8 +584,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
 
         tripFuel = TripFuel.getInstance(getBaseContext());
-        dbTripFuel = tripFuel.getWritableDatabase();
-        stmtTripFuel = dbTripFuel.compileStatement(TripFuel.INSERT_INTO_TABLE_TRIP_FUEL);
+
+        stmtTripFuel = tripFuel.getWritableDatabase()
+                .compileStatement(TripFuel.INSERT_INTO_TABLE_TRIP_FUEL);
     }
 
     @Override
@@ -887,7 +886,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             TripsFuelListItem.setEnabled(false);
             settingsItem.setEnabled(false);
         } else {
-            stopItem.setEnabled(false);
+            stopItem.setEnabled(true);
             startItem.setEnabled(true);
             getDTCItem.setEnabled(true);
             TripsListItem.setEnabled(true);

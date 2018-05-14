@@ -29,6 +29,13 @@ public class TripFuel extends SQLiteOpenHelper {
     private static final String TRIP_FUEL_TIME = "Time";
     private static final String TRIP_FUEL_PERCENT = "Percent";
     private static final String TRIP_FUEL_LITERS = "Liters";
+
+    private static final String[] COLUMNS = new String[]{
+            TRIP_FUEL_TIME,
+            TRIP_FUEL_PERCENT,
+            TRIP_FUEL_LITERS
+    };
+
     //-- -----------------------------------------------------
     //   -- Create TableTripFuel
     //-- -----------------------------------------------------
@@ -172,5 +179,14 @@ public class TripFuel extends SQLiteOpenHelper {
         }
 
         return record;
+    }
+
+    public Cursor queryLastFuel() {
+        return getReadableDatabase().rawQuery(
+                "SELECT * FROM " + TRIP_FUEL_TABLE_NAME + " ORDER BY ? DESC LIMIT 1;",
+                new String[]{
+                        TRIP_FUEL_TIME
+                }
+        );
     }
 }
