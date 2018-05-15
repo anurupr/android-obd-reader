@@ -474,14 +474,16 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 } catch (Exception e) {
                     e.printStackTrace();
                 } finally {
-                    paramFuelPercent = tempFuelPercent;
-                    paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
+
 
                     if (db != null && db.inTransaction()) {
                         db.endTransaction();
                     }
                 }
             }
+
+            paramFuelPercent = tempFuelPercent;
+            paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
         }
     }
 

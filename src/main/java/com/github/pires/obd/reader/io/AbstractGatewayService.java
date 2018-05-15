@@ -12,6 +12,7 @@ import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.github.pires.obd.reader.activity.MainActivity;
 
@@ -38,6 +39,7 @@ public abstract class AbstractGatewayService extends Service {
     protected boolean isRunning = false;
     protected Long queueCounter = 0L;
     protected BlockingQueue<ObdCommandJob> jobsQueue = new LinkedBlockingQueue<>();
+
     // Run the executeQueue in a different thread to lighten the UI thread
     Thread t = new Thread(new Runnable() {
         @Override
@@ -45,7 +47,15 @@ public abstract class AbstractGatewayService extends Service {
             try {
                 executeQueue();
             } catch (InterruptedException e) {
-                t.interrupt();
+
+                e.printStackTrace();
+
+                Toast.makeText(
+                        getBaseContext(),
+                        "ERRO: " + e.getMessage(),
+                        Toast.LENGTH_LONG
+                ).show();
+
             }
         }
     });

@@ -79,26 +79,31 @@ public class MockObdGatewayService extends AbstractGatewayService {
                     Log.e(TAG, "Job state was not new, so it shouldn't be in queue. BUG ALERT!");
                 }
             } catch (InterruptedException i) {
-                Thread.currentThread().interrupt();
+                //Thread.currentThread().interrupt();
             } catch (Exception e) {
+
                 e.printStackTrace();
+
                 if (job != null) {
                     job.setState(ObdCommandJobState.EXECUTION_ERROR);
                 }
+
                 Log.e(TAG, "Failed to run command. -> " + e.getMessage());
             }
 
             if (job != null) {
+
                 Log.d(TAG, "Job is finished.");
+
                 job.setState(ObdCommandJobState.FINISHED);
                 final ObdCommandJob job2 = job;
+
                 ((MainActivity) ctx).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         ((MainActivity) ctx).stateUpdate(job2);
                     }
                 });
-
             }
         }
     }
