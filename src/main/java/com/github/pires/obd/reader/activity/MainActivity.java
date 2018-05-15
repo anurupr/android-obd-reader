@@ -114,10 +114,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     // 1 minute
     // 60000
 
+    // 2 minutes
+    // 120000
+
     // 5 minutes
     // 300000
 
-    private final long TIME_INTERVAL = 300000;
+    private final long TIME_INTERVAL = 120000;
     //private final long TIME_INTERVAL = 60000;
 
     public static boolean hasPermissionGps = false;
@@ -417,84 +420,65 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }
     }
 
+    private void initFuelSupply() {
+        if (paramFuelPercent == 0) {
+            Cursor c = tripFuel.queryLastFuel();
+
+            while (c.moveToNext()) {
+                paramFuelTime = c.getLong(0) * 1000;
+                paramFuelPercent = c.getLong(1);
+                paramFuelLiters = c.getLong(2);
+
+                Log.e("cursorFuelTime", "@@@" + paramFuelTime);
+                Log.e("cursorFuelPercent", "@@@" + paramFuelPercent);
+                Log.e("cursorFuelLiters", "@@@" + paramFuelLiters);
+            }
+
+            c.close();
+        }
+
+        paramFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
+    }
 
     private void calcFuelSupply(ObdCommand cmd) {
 
-        long correntFuelTime = System.currentTimeMillis();
-        long correntFuelPercent = (long) ((FuelLevelCommand) cmd).getFuelLevel();
-        long correntFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
-
-/*        Toast.makeText(
-                getBaseContext(),
-                "FuelLiters: " + correntFuelLiters,
-                Toast.LENGTH_SHORT
-        ).show();*/
-
-        paramFuelTime = correntFuelTime;
-        paramFuelPercentSum += (long) (Math.round(correntFuelPercent * 100.0) / 100.0);
+        paramFuelTime = System.currentTimeMillis();
+        paramFuelPercentSum += Math.round(((FuelLevelCommand) cmd).getFuelLevel() * 100.0) / 100.0;
         paramFuelPercentCount++;
-        paramFuelLiters = correntFuelLiters;
 
-/*        Toast.makeText(
-                getBaseContext(),
-                "paramFuelTime: " + paramFuelTime,
-                Toast.LENGTH_SHORT
-        ).show();*/
+        if (paramFuelTime > paramFuelTimeInterval && paramFuelPercentCount > 12) {
 
-        if (paramFuelPercentCount > 5) {
+            long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
 
-            if (paramFuelPercent == 0) {
-                Cursor c = tripFuel.queryLastFuel();
+            Toast.makeText(
+                    getBaseContext(),
+                    "TIME: " + paramFuelTime,
+                    Toast.LENGTH_SHORT
+            ).show();
 
-                while (c.moveToNext()) {
-                    paramFuelTime = c.getLong(0) * 1000;
-                    paramFuelPercent = c.getLong(1);
-                    paramFuelLiters = c.getLong(2);
+            if ((tempFuelPercent * 0.95) > paramFuelPercent) {
 
-                    Log.e("cursorFuelTime", "@@@" + paramFuelTime);
-                    Log.e("cursorFuelPercent", "@@@" + paramFuelPercent);
-                    Log.e("cursorFuelLiters", "@@@" + paramFuelLiters);
-                }
+                SQLiteDatabase db = tripFuel.getWritableDatabase();
 
-                c.close();
-            }
+                try {
+                    db.beginTransaction();
 
-            if (paramFuelTime > paramFuelTimeInterval) {
+                    tripFuel.stmtInsertIntoTableTripFuel(
+                            stmtTripFuel,
+                            paramFuelTime / 1000,
+                            paramFuelPercent,
+                            paramFuelLiters
+                    );
 
-                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
+                    db.setTransactionSuccessful();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    paramFuelPercent = tempFuelPercent;
+                    paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
 
-                Toast.makeText(
-                        getBaseContext(),
-                        "ENTROU: " + paramFuelTime,
-                        Toast.LENGTH_SHORT
-                ).show();
-
-                if (tempFuelPercent > (paramFuelPercent * 1.05)) {
-
-                    SQLiteDatabase db = tripFuel.getWritableDatabase();
-
-                    try {
-                        db.beginTransaction();
-
-                        tripFuel.stmtInsertIntoTableTripFuel(
-                                stmtTripFuel,
-                                paramFuelTime / 1000,
-                                paramFuelPercent,
-                                paramFuelLiters
-                        );
-
-                        db.setTransactionSuccessful();
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    } finally {
-                        paramFuelPercent = tempFuelPercent;
-                        paramFuelPercentSum = 0;
-                        paramFuelPercentCount = 0;
-                        paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
-
-                        if (db != null && db.inTransaction()) {
-                            db.endTransaction();
-                        }
+                    if (db != null && db.inTransaction()) {
+                        db.endTransaction();
                     }
                 }
             }
@@ -618,6 +602,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         stmtTripFuel = tripFuel.getWritableDatabase()
                 .compileStatement(TripFuel.INSERT_INTO_TABLE_TRIP_FUEL);
+
+        initFuelSupply();
     }
 
     @Override
