@@ -437,8 +437,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
             c.close();
         }
-
-        paramFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
     }
 
 
@@ -452,6 +450,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         paramFuelPercentSum += Math.round(((FuelLevelCommand) cmd).getFuelLevel() * 100.0) / 100.0;
         paramFuelPercentCount++;
+
+        paramFuelLiters = Long.parseLong(prefs.getString("fuel_tank_preference", "0"));
+
+        Log.e("####################", "paramFuelLiters: " + paramFuelLiters);
 
         if (paramFuelTime > paramFuelTimeInterval && paramFuelPercentCount > 20) {
 
@@ -476,6 +478,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                             tempFuelPercent,
                             paramFuelLiters
                     );
+
+                    Toast.makeText(
+                            getBaseContext(),
+                            "@paramFuelLiters: " + paramFuelLiters,
+                            Toast.LENGTH_SHORT
+                    ).show();
+
+                    Log.e("####################", "paramFuelLiters: " + paramFuelLiters);
 
                     db.setTransactionSuccessful();
                 } catch (Exception e) {
