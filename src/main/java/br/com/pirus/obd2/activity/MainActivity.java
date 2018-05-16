@@ -56,7 +56,6 @@ import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
 import com.github.pires.obd.reader.entity.EntityTripRecord;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -878,7 +877,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                         prefs.getString(ConfigActivity.DIRECTORY_FULL_LOGGING_KEY,
                                 getString(R.string.default_dirname_full_logging))
                 );
-            } catch (FileNotFoundException | RuntimeException e) {
+            } catch (RuntimeException e) {
                 Log.e(TAG, "Can't enable logging to file.", e);
             }
         }
