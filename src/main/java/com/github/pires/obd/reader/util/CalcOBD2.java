@@ -15,10 +15,7 @@ public class CalcOBD2 {
      */
     public static double getFuelConsumptionMAF(Fuel fuel, int vehicleSpeed, double massAirFlow) {
 
-        if (massAirFlow <= 0)
-            return 0;
-
-        if (vehicleSpeed < 1)
+        if (massAirFlow <= 0 || vehicleSpeed < 1)
             return 0;
 
         // measured in km/l
@@ -34,22 +31,13 @@ public class CalcOBD2 {
      */
     public static double getFuelConsumptionThrottle(Fuel fuel, int bhp, int vehicleSpeed, double throttlePosition) {
 
-        if (throttlePosition < 0)
+        if (throttlePosition < 0 || vehicleSpeed < 1)
             return 0;
 
-        if (vehicleSpeed < 1)
-            return 0;
-
-        double massAirFlow = (bhp / 1.25) * (throttlePosition / 100);
-
-        // Eficiencia
-        massAirFlow = massAirFlow * 0.50;
+        double massAirFlow = ((bhp / 1.25) * (throttlePosition / 100)) * 0.50;
 
         if (massAirFlow <= 0)
             return 0;
-
-        if (vehicleSpeed < 1)
-            vehicleSpeed = 1;
 
         // measured in km/l
         return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
@@ -64,23 +52,15 @@ public class CalcOBD2 {
      */
     public static double getFuelConsumptionRPM(Fuel fuel, int bhp, int vehicleSpeed, double rpm) {
 
-        if (rpm < 0)
-            return 0;
-
-        if (vehicleSpeed < 1)
+        if (rpm < 0 || vehicleSpeed < 1)
             return 0;
 
 
-        double massAirFlow = (bhp / 1.25) * (rpm / 8000);
+        double massAirFlow = ((bhp / 1.25) * (rpm / 8000)) * 0.50;
 
-        // Eficiencia
-        massAirFlow = massAirFlow * 0.50;
 
         if (massAirFlow <= 0)
             return 0;
-
-        if (vehicleSpeed < 1)
-            vehicleSpeed = 1;
 
         // measured in km/l
         return (fuel.getAirFuelRatio() * fuel.getDensity() * vehicleSpeed) / (3600 * massAirFlow);
