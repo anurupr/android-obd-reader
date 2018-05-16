@@ -5,6 +5,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
 import android.content.ComponentName;
 import android.content.Context;
@@ -440,22 +441,28 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         paramFuelLiters = Integer.parseInt(prefs.getString("fuel_tank_preference", "0"));
     }
 
+
+    // CALC FUEL SUPPLY
+    //=========================================================================
+    //=========================================================================
+
     private void calcFuelSupply(ObdCommand cmd) {
 
         paramFuelTime = System.currentTimeMillis();
+
         paramFuelPercentSum += Math.round(((FuelLevelCommand) cmd).getFuelLevel() * 100.0) / 100.0;
         paramFuelPercentCount++;
 
-        if (paramFuelTime > paramFuelTimeInterval && paramFuelPercentCount > 12) {
+        if (paramFuelTime > paramFuelTimeInterval && paramFuelPercentCount > 20) {
 
             long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
 
-            Toast.makeText(
+
+/*            Toast.makeText(
                     getBaseContext(),
                     "TIME: " + paramFuelTime,
                     Toast.LENGTH_SHORT
-            ).show();
-
+            ).show();*/
             if ((tempFuelPercent * 0.95) > paramFuelPercent) {
 
                 SQLiteDatabase db = tripFuel.getWritableDatabase();
@@ -466,7 +473,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     tripFuel.stmtInsertIntoTableTripFuel(
                             stmtTripFuel,
                             paramFuelTime / 1000,
-                            paramFuelPercent,
+                            tempFuelPercent,
                             paramFuelLiters
                     );
 
@@ -662,6 +669,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     protected void onDestroy() {
         super.onDestroy();
 
+        stopLiveData();
+
         if (mLocService != null) {
             mLocService.removeGpsStatusListener(this);
             mLocService.removeUpdates(this);
@@ -758,6 +767,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case START_LIVE_DATA:
+                stopLiveData();
                 startLiveData();
                 return true;
             case STOP_LIVE_DATA:
@@ -965,16 +975,23 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     private void doUnbindService() {
         if (isServiceBound) {
-            if (service.isRunning()) {
+            if (service != null && service.isRunning()) {
                 service.stopService();
                 if (preRequisites)
                     btStatusTextView.setText(getString(R.string.status_bluetooth_ok));
             }
+
             Log.d(TAG, "Unbinding OBD service..");
             unbindService(serviceConn);
             isServiceBound = false;
             obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
         }
+
+        // Clear all notification
+        NotificationManager nMgr = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        if (nMgr != null)
+            nMgr.cancelAll();
     }
 
     public void onLocationChanged(Location location) {
