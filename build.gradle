@@ -33,7 +33,7 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 27
-        applicationId 'com.github.pires.obd.reader'
+        applicationId 'br.com.pirus.obd2'
     }
 
 /*    lintOptions {
