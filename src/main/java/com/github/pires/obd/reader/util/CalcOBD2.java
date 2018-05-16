@@ -56,7 +56,7 @@ public class CalcOBD2 {
             return 0;
 
 
-        double massAirFlow = ((bhp / 1.25) * (rpm / 8000)) * 0.50;
+        double massAirFlow = ((bhp / 1.25) * (rpm / 7000)) * 0.50;
 
 
         if (massAirFlow <= 0)
