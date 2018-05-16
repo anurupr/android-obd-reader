@@ -4,7 +4,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
@@ -14,17 +13,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class TripFuel extends SQLiteOpenHelper {
+public class TripFuel {
 
     /// the database version number
-    public static final int DATABASE_VERSION = 1;
+    //public static final int DATABASE_VERSION = 1;
 
     /// the name of the database
-    public static final String DATABASE_NAME = "tripsFuel.db";
+    //public static final String DATABASE_NAME = "tripsFuel.db";
+    //public static final String DATABASE_NAME = "tripslog.db";
 
     /// a tag string for debug logging (the name of this class)
     private static final String TAG = TripFuel.class.getName();
-
     private static final String TRIP_FUEL_TABLE_NAME = "TripFuel";
     private static final String TRIP_FUEL_TIME = "Time";
     private static final String TRIP_FUEL_PERCENT = "Percent";
@@ -66,9 +65,21 @@ public class TripFuel extends SQLiteOpenHelper {
     /// singleton instance
     private static TripFuel instance;
 
-    public TripFuel(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, name, factory, version);
+    /// context of the instance creator
+    private final Context context;
+    /// a helper instance used to open and close the database
+    private final TripLogOpenHelper helper;
+    /// the database
+    private final SQLiteDatabase db;
+
+    public TripFuel(Context context) {
+        this.context = context;
+        this.helper = new TripLogOpenHelper(this.context);
+        this.db = helper.getWritableDatabase();
+        this.createTable(this.db);
     }
+
+    //private static Context mContext;
 
     /**
      * DESCRIPTION:
@@ -78,13 +89,12 @@ public class TripFuel extends SQLiteOpenHelper {
      */
     public static TripFuel getInstance(Context context) {
         if (instance == null) {
-            instance = new TripFuel(context, DATABASE_NAME, null, DATABASE_VERSION);
+            instance = new TripFuel(context);
         }
         return instance;
     }
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
+    public void createTable(SQLiteDatabase db) {
         try {
             db.beginTransaction();
             db.execSQL(CREATE_TABLE_TRIP_FUEL);
@@ -94,18 +104,21 @@ public class TripFuel extends SQLiteOpenHelper {
         }
     }
 
-    @Override
+/*    @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
-    }
+    }*/
 
     public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, long percent, long liters) {
         stmt.bindLong(1, time);
         stmt.bindLong(2, percent);
         stmt.bindLong(3, liters);
-
         stmt.execute();
         stmt.clearBindings();
+    }
+
+    public SQLiteDatabase getWritableDatabase() {
+        return db;
     }
 
     public List<EntityTripFuel> readAllRecords() {
@@ -120,7 +133,7 @@ public class TripFuel extends SQLiteOpenHelper {
         try {
             String orderBy = TRIP_FUEL_TIME;
 
-            cursor = getReadableDatabase().query(
+            cursor = this.db.query(
                     TRIP_FUEL_TABLE_NAME,
                     TRIP_FUEL_COLUMNS,
                     null,
@@ -182,7 +195,7 @@ public class TripFuel extends SQLiteOpenHelper {
     }
 
     public Cursor queryLastFuel() {
-        return getReadableDatabase().rawQuery(
+        return this.db.rawQuery(
                 "SELECT * FROM " + TRIP_FUEL_TABLE_NAME + " ORDER BY ? DESC LIMIT 1;",
                 new String[]{
                         TRIP_FUEL_TIME

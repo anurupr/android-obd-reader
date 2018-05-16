@@ -66,11 +66,19 @@ public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
         String rpmMax = String.valueOf(record.getEngineRpmMax());
 
         String engineRuntime = record.getEngineRuntime();
+
         if (engineRuntime == null)
             engineRuntime = "None";
-        rowEngine.setText("Engine Runtime: " + engineRuntime + "\tMax RPM: " + rpmMax);
 
-        rowOther.setText("Max speed: " + String.valueOf(record.getSpeedMax()));
+        double consumption = record.getConsumption();
+
+
+        rowEngine.setText("Engine Runtime: " + engineRuntime + "\t\t Max RPM: " + rpmMax);
+
+        rowOther.setText(
+                "Max speed: " + String.valueOf(record.getSpeedMax()) +
+                        " km \t\t Consumption: " + consumption + " km/l");
+
         return view;
     }
 

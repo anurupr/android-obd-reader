@@ -38,6 +38,9 @@ public class TripLog {
     private static final String RECORD_RPM_MAX = "rmpMax";
     private static final String RECORD_SPEED_MAX = "speedMax";
     private static final String RECORD_ENGINE_RUNTIME = "engineRuntime";
+    private static final String RECORD_CONSUMPTION = "consumption";
+
+
     /// SQL commands to create the database
     public static final String[] DATABASE_CREATE = new String[]{
             "create table " + RECORDS_TABLE + " ( " +
@@ -46,7 +49,8 @@ public class TripLog {
                     RECORD_END_DATE + " integer, " +
                     RECORD_SPEED_MAX + " integer, " +
                     RECORD_RPM_MAX + " integer, " +
-                    RECORD_ENGINE_RUNTIME + " text" +
+                    RECORD_ENGINE_RUNTIME + " text," +
+                    RECORD_CONSUMPTION + " real" +
                     ");"
     };
     /// array of all column names for RECORDS_TABLE
@@ -56,8 +60,10 @@ public class TripLog {
             RECORD_END_DATE,
             RECORD_SPEED_MAX,
             RECORD_ENGINE_RUNTIME,
-            RECORD_RPM_MAX
+            RECORD_RPM_MAX,
+            RECORD_CONSUMPTION
     };
+
     /// singleton instance
     private static TripLog instance;
     /// context of the instance creator
@@ -160,6 +166,7 @@ public class TripLog {
             values.put(RECORD_END_DATE, record.getEndDate().getTime());
         values.put(RECORD_RPM_MAX, record.getEngineRpmMax());
         values.put(RECORD_SPEED_MAX, record.getSpeedMax());
+        values.put(RECORD_CONSUMPTION, record.getConsumption());
         if (record.getEngineRuntime() != null)
             values.put(RECORD_ENGINE_RUNTIME, record.getEngineRuntime());
         return values;
@@ -251,11 +258,17 @@ public class TripLog {
             long endTime = c.getLong(c.getColumnIndex(RECORD_END_DATE));
             int engineRpmMax = c.getInt(c.getColumnIndex(RECORD_RPM_MAX));
             int speedMax = c.getInt(c.getColumnIndex(RECORD_SPEED_MAX));
+            double consumption = c.getDouble(c.getColumnIndex(RECORD_CONSUMPTION));
+
+
             record.setID(id);
             record.setStartDate(new Date(startDate));
             record.setEndDate(new Date(endTime));
             record.setEngineRpmMax(engineRpmMax);
             record.setSpeedMax(speedMax);
+            record.setConsumption(consumption);
+
+
             if (!c.isNull(c.getColumnIndex(RECORD_ENGINE_RUNTIME)))
                 record.setEngineRuntime(c.getString(c.getColumnIndex(RECORD_ENGINE_RUNTIME)));
         }

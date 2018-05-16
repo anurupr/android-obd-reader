@@ -469,6 +469,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 SQLiteDatabase db = tripFuel.getWritableDatabase();
 
+
                 try {
                     db.beginTransaction();
 
@@ -523,20 +524,20 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         TextView existingTV;
 
-        consumptionResult = new DecimalFormat("0.0").format(consumption) + "km/l";
+        consumptionResult = new DecimalFormat("0.0").format(consumption);
 
         existingTV = vv.findViewWithTag("CONSUMPTION");
-        existingTV.setText(consumptionResult);
+        existingTV.setText(consumptionResult + "km/l");
 
         consumptionSum += consumption;
         consumptionCount += 1;
 
         consumptionAverage =
                 new DecimalFormat("0.0").format(
-                        CalcOBD2.getAverage(consumptionSum, consumptionCount)) + "km/l";
+                        CalcOBD2.getAverage(consumptionSum, consumptionCount));
 
         existingTV = vv.findViewWithTag("AVERAGE");
-        existingTV.setText(consumptionAverage);
+        existingTV.setText(consumptionAverage + "km/l");
     }
 
 
@@ -568,6 +569,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             if (cmdID.equals(AvailableCommandNames.SPEED.toString())) {
                 SpeedCommand command = (SpeedCommand) job.getCommand();
                 currentTrip.setSpeedMax(command.getMetricSpeed());
+                currentTrip.setConsumption(Double.parseDouble(consumptionAverage.
+                        replace(",", ".")));
+
             } else if (cmdID.equals(AvailableCommandNames.ENGINE_RPM.toString())) {
                 RPMCommand command = (RPMCommand) job.getCommand();
                 currentTrip.setEngineRpmMax(command.getRPM());

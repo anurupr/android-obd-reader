@@ -21,6 +21,9 @@ public class EntityTripRecord {
 
     private String engineRuntime;
 
+    private double consumption = 0;
+
+
     public EntityTripRecord() {
         startDate = new Date();
     }
@@ -110,6 +113,14 @@ public class EntityTripRecord {
         if (this.engineRpmMax < value) {
             this.engineRpmMax = value;
         }
+    }
+
+    public double getConsumption() {
+        return consumption;
+    }
+
+    public void setConsumption(double consumption) {
+        this.consumption = consumption;
     }
 
     /**
