@@ -147,8 +147,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private TripLog triplog;
     private EntityTripRecord currentTrip;
 
-    private String consumptionResult = "0,0 km/l";
-    private String consumptionAverage = "0,0 km/l";
+    private String consumptionResult = "0";
+    private String consumptionAverage = "0";
 
     private long paramFuelTimeInterval = 0;
     private long paramFuelTime = 0;
@@ -421,6 +421,52 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         }
     }
 
+    private void resetParams() {
+        consumptionResult = "0";
+        consumptionAverage = "0";
+
+        paramSpeed = 0;
+        paramMaf = 0;
+        paramRpm = 0;
+        paramThrottle = 0;
+
+        paramFuelTimeInterval = 0;
+        paramFuelTime = 0;
+        paramFuelPercent = 0;
+        paramFuelLiters = 0;
+
+        paramFuelPercentSum = 0;
+        paramFuelPercentCount = 0;
+
+        consumptionSum = 0.0;
+        consumptionCount = 0;
+
+        TextView existingTV;
+
+        existingTV = vv.findViewWithTag("CONSUMPTION");
+        existingTV.setText("0");
+
+        existingTV = vv.findViewWithTag("AVERAGE");
+        existingTV.setText("0");
+
+        existingTV = vv.findViewWithTag("SPEED");
+        existingTV.setText("0");
+
+        existingTV = vv.findViewWithTag("ENGINE_RPM");
+        existingTV.setText("0");
+
+        existingTV = vv.findViewWithTag("MAF");
+        existingTV.setText("0");
+
+        existingTV = vv.findViewWithTag("THROTTLE_POS");
+        existingTV.setText("0");
+
+        //ENGINE_RPM
+        //SPEED
+        //MAF
+        //THROTTLE_POS
+    }
+
     private void initFuelSupply() {
         if (paramFuelPercent == 0) {
             Cursor c = tripFuel.queryLastFuel();
@@ -479,14 +525,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                             tempFuelPercent,
                             paramFuelLiters
                     );
-
-                    Toast.makeText(
-                            getBaseContext(),
-                            "@paramFuelLiters: " + paramFuelLiters,
-                            Toast.LENGTH_SHORT
-                    ).show();
-
-                    Log.e("####################", "paramFuelLiters: " + paramFuelLiters);
 
                     db.setTransactionSuccessful();
                 } catch (Exception e) {
@@ -781,6 +819,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case START_LIVE_DATA:
+                resetParams();
                 stopLiveData();
                 startLiveData();
                 return true;

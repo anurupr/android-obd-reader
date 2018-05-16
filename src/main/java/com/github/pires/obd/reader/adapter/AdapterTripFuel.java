@@ -62,10 +62,10 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         EntityTripFuel record = records.get(position);
 
         // date
-        rowEngine.setText(record.getPercent() + "%");
+        rowEngine.setText("Fuel Input: " + record.getPercent() + "%");
         //columnDuration.setText(getDate(record.getTimeStamp()));
         startDate.setText(getDate(record.getTime()));
-        rowOther.setText((record.getLiters() * (record.getPercent() / 100.0)) + "L");
+        rowOther.setText("Liters: " + (record.getLiters() * (record.getPercent() / 100.0)) + "L");
 
         return view;
     }

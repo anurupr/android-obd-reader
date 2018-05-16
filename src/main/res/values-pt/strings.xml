@@ -31,6 +31,7 @@
     <string name="title_pref_commands">Comandos OBD</string>
     <string name="title_activity_trouble_codes">C&#243;digos de Erro</string>
     <string name="title_activity_trips_list">Lista de viagens</string>
+    <string name="title_activity_trips_fuel_list">Lista de abastecimentos</string>
     <string name="text_save_trip_not_available">Desculpe, a viagem n&#227;o ser&#225; armazenada.</string>
     <string name="text_obd_command_failure">Erro no comando OBD!</string>
     <string name="text_noerrors">Nenhum erro encontrado!</string>
