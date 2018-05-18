@@ -479,6 +479,12 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 paramFuelPercent = c.getLong(2);
                 paramFuelLiters = c.getLong(3);
 
+                Toast.makeText(
+                        getBaseContext(),
+                        "paramFuelPercent: " + paramFuelPercent,
+                        Toast.LENGTH_SHORT
+                ).show();
+
                 Log.e("cursorFuelTime", "@@@" + paramFuelTime);
                 Log.e("cursorFuelPercent", "@@@" + paramFuelPercent);
                 Log.e("cursorFuelLiters", "@@@" + paramFuelLiters);
