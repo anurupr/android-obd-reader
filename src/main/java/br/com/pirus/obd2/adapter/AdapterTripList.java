@@ -7,12 +7,11 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.github.pires.obd.reader.entity.EntityTripRecord;
-
 import java.util.Date;
 import java.util.List;
 
 import br.com.pirus.obd2.R;
+import br.com.pirus.obd2.entity.EntityTripRecord;
 
 public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
 

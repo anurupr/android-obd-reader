@@ -1,4 +1,4 @@
-package com.github.pires.obd.reader.entity;
+package br.com.pirus.obd2.entity;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

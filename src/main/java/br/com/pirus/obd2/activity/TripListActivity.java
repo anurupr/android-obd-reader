@@ -11,12 +11,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
-import com.github.pires.obd.reader.entity.EntityTripRecord;
-
 import java.util.List;
 
 import br.com.pirus.obd2.R;
 import br.com.pirus.obd2.adapter.AdapterTripList;
+import br.com.pirus.obd2.entity.EntityTripRecord;
 import br.com.pirus.obd2.trips.TripLog;
 
 import static br.com.pirus.obd2.activity.ConfirmDialog.createDialog;

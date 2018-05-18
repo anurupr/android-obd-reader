@@ -8,11 +8,11 @@ import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
-import com.github.pires.obd.reader.entity.EntityTripRecord;
-
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+
+import br.com.pirus.obd2.entity.EntityTripRecord;
 
 /**
  * Some code taken from https://github.com/wdkapps/FillUp

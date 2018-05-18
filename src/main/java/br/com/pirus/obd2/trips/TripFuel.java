@@ -7,10 +7,10 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.util.Log;
 
-import com.github.pires.obd.reader.entity.EntityTripFuel;
-
 import java.util.ArrayList;
 import java.util.List;
+
+import br.com.pirus.obd2.entity.EntityTripFuel;
 
 
 public class TripFuel {
@@ -24,37 +24,47 @@ public class TripFuel {
 
     /// a tag string for debug logging (the name of this class)
     private static final String TAG = TripFuel.class.getName();
+
     private static final String TRIP_FUEL_TABLE_NAME = "TripFuel";
     private static final String TRIP_FUEL_TIME = "Time";
-    private static final String TRIP_FUEL_PERCENT = "Percent";
+    private static final String TRIP_FUEL_PERCENT_BEGIN = "PercentBegin";
+    private static final String TRIP_FUEL_PERCENT_END = "PercentEnd";
     private static final String TRIP_FUEL_LITERS = "Liters";
+
     //-- -----------------------------------------------------
     //   -- Create TableTripFuel
     //-- -----------------------------------------------------
     public static final String CREATE_TABLE_TRIP_FUEL =
             "CREATE TABLE IF NOT EXISTS " + TRIP_FUEL_TABLE_NAME + "(" +
                     TRIP_FUEL_TIME + " INTEGER NOT NULL," +
-                    TRIP_FUEL_PERCENT + " INTEGER NOT NULL," +
+                    TRIP_FUEL_PERCENT_BEGIN + " INTEGER NOT NULL," +
+                    TRIP_FUEL_PERCENT_END + " INTEGER NOT NULL," +
                     TRIP_FUEL_LITERS + " INTEGER NOT NULL," +
                     "PRIMARY KEY (" + TRIP_FUEL_TIME + "));";
+
     //-- -----------------------------------------------------
     //   -- Insert TableFuel
     //-- -----------------------------------------------------
     public static final String INSERT_INTO_TABLE_TRIP_FUEL =
             "INSERT INTO " + TRIP_FUEL_TABLE_NAME + "(" +
                     TRIP_FUEL_TIME + "," +
-                    TRIP_FUEL_PERCENT + "," +
+                    TRIP_FUEL_PERCENT_BEGIN + "," +
+                    TRIP_FUEL_PERCENT_END + "," +
                     TRIP_FUEL_LITERS +
-                    ") VALUES(?,?,?);";
+                    ") VALUES(?,?,?,?);";
+
     private static final String[] COLUMNS = new String[]{
             TRIP_FUEL_TIME,
-            TRIP_FUEL_PERCENT,
+            TRIP_FUEL_PERCENT_BEGIN,
+            TRIP_FUEL_PERCENT_END,
             TRIP_FUEL_LITERS
     };
+
     /// array of all column names for RECORDS_TABLE
     private static final String[] TRIP_FUEL_COLUMNS = new String[]{
             TRIP_FUEL_TIME,
-            TRIP_FUEL_PERCENT,
+            TRIP_FUEL_PERCENT_BEGIN,
+            TRIP_FUEL_PERCENT_END,
             TRIP_FUEL_LITERS
     };
 
@@ -105,10 +115,14 @@ public class TripFuel {
 
     }*/
 
-    public void stmtInsertIntoTableTripFuel(SQLiteStatement stmt, long time, long percent, long liters) {
+    public void stmtInsertIntoTableTripFuel(
+            SQLiteStatement stmt, long time, long percentBegin, long percentEnd, long liters) {
+
         stmt.bindLong(1, time);
-        stmt.bindLong(2, percent);
-        stmt.bindLong(3, liters);
+        stmt.bindLong(2, percentBegin);
+        stmt.bindLong(3, percentEnd);
+        stmt.bindLong(4, liters);
+
         stmt.execute();
         stmt.clearBindings();
     }
@@ -179,11 +193,13 @@ public class TripFuel {
             record = new EntityTripFuel();
 
             long time = c.getLong(c.getColumnIndex(TRIP_FUEL_TIME));
-            long percent = c.getLong(c.getColumnIndex(TRIP_FUEL_PERCENT));
+            long percentBegin = c.getLong(c.getColumnIndex(TRIP_FUEL_PERCENT_BEGIN));
+            long percentEnd = c.getLong(c.getColumnIndex(TRIP_FUEL_PERCENT_END));
             long liters = c.getLong(c.getColumnIndex(TRIP_FUEL_LITERS));
 
             record.setTime(time);
-            record.setPercent(percent);
+            record.setPercentBegin(percentBegin);
+            record.setPercentEnd(percentEnd);
             record.setLiters(liters);
         }
 

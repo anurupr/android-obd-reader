@@ -54,7 +54,6 @@ import com.github.pires.obd.commands.engine.RuntimeCommand;
 import com.github.pires.obd.commands.engine.ThrottlePositionCommand;
 import com.github.pires.obd.commands.fuel.FuelLevelCommand;
 import com.github.pires.obd.enums.AvailableCommandNames;
-import com.github.pires.obd.reader.entity.EntityTripRecord;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
@@ -66,6 +65,7 @@ import java.util.Map;
 
 import br.com.pirus.obd2.R;
 import br.com.pirus.obd2.config.ObdConfig;
+import br.com.pirus.obd2.entity.EntityTripRecord;
 import br.com.pirus.obd2.io.AbstractGatewayService;
 import br.com.pirus.obd2.io.LogCSVWriter;
 import br.com.pirus.obd2.io.MockObdGatewayService;
@@ -96,6 +96,7 @@ import roboguice.inject.InjectView;*/
 public class MainActivity extends Activity implements ObdProgressListener, LocationListener, GpsStatus.Listener {
 
     private static final String TAG = MainActivity.class.getName();
+
     private static final int NO_BLUETOOTH_ID = 0;
     private static final int BLUETOOTH_DISABLED = 1;
     private static final int START_LIVE_DATA = 2;
@@ -117,17 +118,21 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     // 2 minutes
     // 120000
 
+    // 3 minutes
+    // 180000
+
     // 5 minutes
     // 300000
     public static boolean hasPermissionGps = false;
-    //private final long TIME_INTERVAL = 60000;
     private static boolean bluetoothDefaultIsEnable = false;
     private final long TIME_INTERVAL = 120000;
+
     /*
     static {
         RoboGuice.setUseAnnotationDatabases(false);
     }
     */
+
     public Map<String, String> commandResult = new HashMap<>();
     boolean mGpsIsStarted = false;
 
@@ -150,27 +155,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private long paramFuelTimeInterval = 0;
     private long paramFuelTime = 0;
     private long paramFuelPercent = 0;
-    private long paramFuelLiters = 0;
-
-    private long paramFuelPercentSum = 0;
-    private long paramFuelPercentCount = 0;
-
-    private double consumptionSum = 0.0;
-    private int consumptionCount = 0;
-
-    private TripFuel tripFuel;
-    //private SQLiteDatabase dbTripFuel;
-    private SQLiteStatement stmtTripFuel;
-
-    //private List<Double> consumptionList = new ArrayList<>();
-
-    //@InjectView(R.id.compass_text)
-    private TextView compass;
     private final SensorEventListener orientListener = new SensorEventListener() {
 
         public void onSensorChanged(SensorEvent event) {
+
             float x = event.values[0];
             String dir = "";
+
             if (x >= 337.5 || x < 22.5) {
                 dir = "N";
             } else if (x >= 22.5 && x < 67.5) {
@@ -188,6 +179,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             } else if (x >= 292.5 && x < 337.5) {
                 dir = "NW";
             }
+
             updateTextView(compass, dir);
         }
 
@@ -195,6 +187,22 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             // do nothing
         }
     };
+    private long paramFuelPercentBegin = 0;
+    private long paramFuelLiters = 0;
+    private long paramFuelPercentSum = 0;
+    private long paramFuelPercentCount = 0;
+    private long paramFuelPercentEnd = 0;
+    private int consumptionCount = 0;
+
+    private TripFuel tripFuel;
+    //private SQLiteDatabase dbTripFuel;
+    private SQLiteStatement stmtTripFuel;
+
+    //private List<Double> consumptionList = new ArrayList<>();
+
+    //@InjectView(R.id.compass_text)
+    private TextView compass;
+    private double consumptionSum = 0;
 
     //@InjectView(R.id.BT_STATUS)
     private TextView btStatusTextView;
@@ -351,13 +359,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
                 Log.e("***************", "***************");
 
-                    /*
-                    Toast.makeText(
-                            getBaseContext(),
-                            "FUEL_LEVEL: " + ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
-                            Toast.LENGTH_SHORT
-                    ).show();
-                    */
+                /*
+                Toast.makeText(
+                        getBaseContext(),
+                        "FUEL_LEVEL: " + ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
+                        Toast.LENGTH_SHORT
+                ).show();
+                */
 
 
                 setConsumptionParams(cmdID, job.getCommand());
@@ -366,7 +374,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     TextView existingTV = vv.findViewWithTag(cmdID);
                     existingTV.setText(cmdResult);
                 } else addTableRow(cmdID, cmdName, cmdResult);
-
 
                 commandResult.put(cmdID, cmdResult);
                 updateTripStatistic(job, cmdID);
@@ -392,7 +399,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         return consumption;
     }*/
-
 
     private void setConsumptionParams(String cmdID, ObdCommand cmd) {
         if (cmdID.equals("MAF")) {
@@ -470,8 +476,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
             while (c.moveToNext()) {
                 paramFuelTime = c.getLong(0) * 1000;
-                paramFuelPercent = c.getLong(1);
-                paramFuelLiters = c.getLong(2);
+                paramFuelPercent = c.getLong(2);
+                paramFuelLiters = c.getLong(3);
 
                 Log.e("cursorFuelTime", "@@@" + paramFuelTime);
                 Log.e("cursorFuelPercent", "@@@" + paramFuelPercent);
@@ -496,47 +502,65 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         paramFuelLiters = Long.parseLong(prefs.getString("fuel_tank_preference", "0"));
 
-        Log.e("####################", "paramFuelLiters: " + paramFuelLiters);
 
-        if (paramFuelTime > paramFuelTimeInterval && paramFuelPercentCount > 20) {
-
-            long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
-
-
-/*            Toast.makeText(
-                    getBaseContext(),
-                    "TIME: " + paramFuelTime,
-                    Toast.LENGTH_SHORT
-            ).show();*/
-            if ((tempFuelPercent * 0.95) > paramFuelPercent) {
-
-                SQLiteDatabase db = tripFuel.getWritableDatabase();
+        Log.e("#######", "@paramFuelPercentSum: " + paramFuelPercentSum);
+        Log.e("#######", "@paramFuelPercentCount: " + paramFuelPercentCount);
+        Log.e("#######", "@paramFuelTimeInterval: " + paramFuelTimeInterval);
+        Log.e("#######", "@paramFuelPercentBegin: " + paramFuelPercent);
 
 
-                try {
-                    db.beginTransaction();
+        if (paramFuelPercentCount > 20) {
 
-                    tripFuel.stmtInsertIntoTableTripFuel(
-                            stmtTripFuel,
-                            paramFuelTime / 1000,
-                            tempFuelPercent,
-                            paramFuelLiters
-                    );
+            Log.e("#######", "@11111");
 
-                    db.setTransactionSuccessful();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
+            if (paramFuelTimeInterval == 0) {
 
+                Log.e("#######", "@222222");
 
-                    if (db != null && db.inTransaction()) {
-                        db.endTransaction();
+                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
+
+                if ((tempFuelPercent * 0.95) > paramFuelPercent) {
+                    paramFuelPercentBegin = paramFuelPercent;
+                    paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
+                }
+
+                paramFuelPercent = tempFuelPercent;
+            } else if (paramFuelTime > paramFuelTimeInterval) {
+
+                Log.e("#######", "@333333");
+
+                long tempFuelPercent = paramFuelPercentSum / paramFuelPercentCount;
+
+                if ((tempFuelPercent * 0.95) > paramFuelPercentBegin) {
+
+                    SQLiteDatabase db = tripFuel.getWritableDatabase();
+
+                    try {
+                        db.beginTransaction();
+
+                        tripFuel.stmtInsertIntoTableTripFuel(
+                                stmtTripFuel,
+                                (paramFuelTime - TIME_INTERVAL) / 1000,
+                                paramFuelPercentBegin,
+                                paramFuelPercentSum / paramFuelPercentCount,
+                                paramFuelLiters
+                        );
+
+                        paramFuelTimeInterval = 0;
+                        paramFuelPercentBegin = 0;
+                        paramFuelPercentSum = 0;
+                        paramFuelPercentCount = 0;
+
+                        db.setTransactionSuccessful();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    } finally {
+                        if (db != null && db.inTransaction()) {
+                            db.endTransaction();
+                        }
                     }
                 }
             }
-
-            paramFuelPercent = tempFuelPercent;
-            paramFuelTimeInterval = paramFuelTime + TIME_INTERVAL;
         }
     }
 
@@ -877,6 +901,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                         prefs.getString(ConfigActivity.DIRECTORY_FULL_LOGGING_KEY,
                                 getString(R.string.default_dirname_full_logging))
                 );
+
             } catch (RuntimeException e) {
                 Log.e(TAG, "Can't enable logging to file.", e);
             }
@@ -894,7 +919,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         releaseWakeLockIfHeld();
 
         final String devemail = prefs.getString(ConfigActivity.DEV_EMAIL_KEY, null);
+
         if (devemail != null && !devemail.isEmpty()) {
+
             DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
@@ -909,6 +936,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     }
                 }
             };
+
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Where there issues?\nThen please send us the logs.\nSend Logs?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();

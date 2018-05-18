@@ -8,13 +8,12 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
-import com.github.pires.obd.reader.entity.EntityTripFuel;
-
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
 
 import br.com.pirus.obd2.R;
+import br.com.pirus.obd2.entity.EntityTripFuel;
 
 public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
 
@@ -63,10 +62,17 @@ public class AdapterTripFuel extends ArrayAdapter<EntityTripFuel> {
         EntityTripFuel record = records.get(position);
 
         // date
-        rowEngine.setText("Fuel Input: " + record.getPercent() + "%");
+        rowEngine.setText(
+                "Fuel begin: " + record.getPercentBegin() + "% \t\t" +
+                        "Fuel end: " + record.getPercentEnd() + "%"
+        );
+
         //columnDuration.setText(getDate(record.getTimeStamp()));
         startDate.setText(getDate(record.getTime()));
-        rowOther.setText("Liters: " + (record.getLiters() * (record.getPercent() / 100.0)) + "L");
+
+        long diff = record.getPercentEnd() - record.getPercentBegin();
+
+        rowOther.setText("Liters: " + (record.getLiters() * (diff / 100.0)) + "L");
 
         return view;
     }

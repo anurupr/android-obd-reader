@@ -1,4 +1,4 @@
-package com.github.pires.obd.reader.entity;
+package br.com.pirus.obd2.entity;
 
 /**
  * Created by mathiaseloi on 08/05/18.
@@ -7,30 +7,39 @@ package com.github.pires.obd.reader.entity;
 public class EntityTripFuel {
 
     private long time;
-    private long percent;
+    private long percentBegin;
+    private long percentEnd;
     private long liters;
-
-    public long getTime() {
-        return time;
-    }
 
     public void setTime(long time) {
         this.time = time;
     }
 
-    public long getPercent() {
-        return percent;
+    public long getTime() {
+        return time;
     }
 
-    public void setPercent(long percent) {
-        this.percent = percent;
-    }
-
-    public long getLiters() {
-        return liters;
+    public long getPercentBegin() {
+        return percentBegin;
     }
 
     public void setLiters(long liters) {
         this.liters = liters;
+    }
+
+    public void setPercentBegin(long percentBegin) {
+        this.percentBegin = percentBegin;
+    }
+
+    public long getPercentEnd() {
+        return percentEnd;
+    }
+
+    public void setPercentEnd(long percentEnd) {
+        this.percentEnd = percentEnd;
+    }
+
+    public long getLiters() {
+        return liters;
     }
 }
