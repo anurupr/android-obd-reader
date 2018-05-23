@@ -74,13 +74,13 @@ public class TripFuel {
     /// context of the instance creator
     private final Context context;
     /// a helper instance used to open and close the database
-    private final TripLogOpenHelper helper;
+    private final TripOpenHelper helper;
     /// the database
     private final SQLiteDatabase db;
 
     public TripFuel(Context context) {
         this.context = context;
-        this.helper = new TripLogOpenHelper(this.context);
+        this.helper = new TripOpenHelper(this.context);
         this.db = helper.getWritableDatabase();
         this.createTable(this.db);
     }
@@ -209,9 +209,7 @@ public class TripFuel {
     public Cursor queryLastFuel() {
         return this.db.rawQuery(
                 "SELECT * FROM " + TRIP_FUEL_TABLE_NAME + " ORDER BY ? DESC LIMIT 1;",
-                new String[]{
-                        TRIP_FUEL_TIME
-                }
+                new String[]{TRIP_FUEL_TIME}
         );
     }
 }

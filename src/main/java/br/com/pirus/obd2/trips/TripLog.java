@@ -19,10 +19,7 @@ import br.com.pirus.obd2.entity.EntityTripRecord;
  */
 public class TripLog {
 
-    /// the database version number
-    public static final int DATABASE_VERSION = 1;
-    /// the name of the database
-    public static final String DATABASE_NAME = "tripslog.db";
+
     /// a tag string for debug logging (the name of this class)
     private static final String TAG = TripLog.class.getName();
     /// database table names
@@ -69,13 +66,13 @@ public class TripLog {
     /// context of the instance creator
     private final Context context;
     /// a helper instance used to open and close the database
-    private final TripLogOpenHelper helper;
+    private final TripOpenHelper helper;
     /// the database
     private final SQLiteDatabase db;
 
     private TripLog(Context context) {
         this.context = context;
-        this.helper = new TripLogOpenHelper(this.context);
+        this.helper = new TripOpenHelper(this.context);
         this.db = helper.getWritableDatabase();
     }
 

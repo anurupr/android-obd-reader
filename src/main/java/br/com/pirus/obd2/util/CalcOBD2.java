@@ -75,35 +75,6 @@ public class CalcOBD2 {
         return total / divisor;
     }
 
-    /**
-     * @param rpm
-     * @param map
-     * @param iat
-     * @return
-     */
-    public static double getIMAP(int rpm, double map, double iat) {
-        return ((rpm * map) / iat) / 2;
-    }
-
-    /**
-     * @param imap
-     * @param vdm
-     * @return
-     */
-    public static double getMAF(double imap, double vdm) {
-
-        // average molecular mass of air
-        double mm = 28.97;
-
-        // volumetric efficiency in percent
-        int ev = 85;
-
-        // constant kelvin joules per mole
-        double r = 8.314;
-
-
-        return ((imap / 60) * ev * vdm * mm) / r;
-    }
 
     /**
      * @param totalCapacity
@@ -137,7 +108,11 @@ public class CalcOBD2 {
         Ethanol(9, 789),
         Gasoline(14.68, 803),
         GasNatural(17.2, 712),
-        E27((0.73 * 14.68) + (0.27 * 9), (0.73 * 803) + (0.27 * 789));
+
+        E27(
+                (0.73 * Gasoline.getAirFuelRatio()) + (0.27 * Ethanol.getAirFuelRatio()),
+                (0.73 * Gasoline.getDensity()) + (0.27 * Ethanol.getDensity())
+        );
 
         // measured in g/m3
         double airFuelRatio;

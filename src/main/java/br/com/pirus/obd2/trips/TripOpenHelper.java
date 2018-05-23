@@ -5,15 +5,18 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
-/**
- * Created by elagin on 13.03.15.
- */
-public class TripLogOpenHelper extends SQLiteOpenHelper {
-    /// tag for logging
-    private static final String TAG = TripLogOpenHelper.class.getName();
 
-    public TripLogOpenHelper(Context context) {
-        super(context, TripLog.DATABASE_NAME, null, TripLog.DATABASE_VERSION);
+public class TripOpenHelper extends SQLiteOpenHelper {
+
+    /// the database version number
+    public static final int DATABASE_VERSION = 1;
+    /// the name of the database
+    public static final String DATABASE_NAME = "trips.db";
+    /// tag for logging
+    private static final String TAG = TripOpenHelper.class.getName();
+
+    public TripOpenHelper(Context context) {
+        super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
     @Override
