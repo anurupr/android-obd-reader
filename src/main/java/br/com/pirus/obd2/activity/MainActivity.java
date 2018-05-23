@@ -65,7 +65,7 @@ import java.util.Map;
 
 import br.com.pirus.obd2.R;
 import br.com.pirus.obd2.config.ObdConfig;
-import br.com.pirus.obd2.entity.EntityTripRecord;
+import br.com.pirus.obd2.entity.EntityTripTravel;
 import br.com.pirus.obd2.io.AbstractGatewayService;
 import br.com.pirus.obd2.io.LogCSVWriter;
 import br.com.pirus.obd2.io.MockObdGatewayService;
@@ -75,7 +75,7 @@ import br.com.pirus.obd2.io.ObdProgressListener;
 import br.com.pirus.obd2.net.ObdReading;
 import br.com.pirus.obd2.net.ObdService;
 import br.com.pirus.obd2.trips.TripFuel;
-import br.com.pirus.obd2.trips.TripLog;
+import br.com.pirus.obd2.trips.TripTravel;
 import br.com.pirus.obd2.util.CalcOBD2;
 import retrofit.RestAdapter;
 import retrofit.RetrofitError;
@@ -146,8 +146,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private LogCSVWriter myCSVWriter;
     private Location mLastLocation;
     /// the trip log
-    private TripLog triplog;
-    private EntityTripRecord currentTrip;
+    private TripTravel triplog;
+    private EntityTripTravel currentTrip;
 
     private String consumptionResult = "0";
     private String consumptionAverage = "0";
@@ -682,7 +682,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             showDialog(NO_ORIENTATION_SENSOR);
 
         // create a log instance for use by this application
-        triplog = TripLog.getInstance(this.getApplicationContext());
+        triplog = TripTravel.getInstance(this.getApplicationContext());
 
         obdStatusTextView.setText(getString(R.string.status_obd_disconnected));
 

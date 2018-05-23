@@ -21,7 +21,7 @@ public class TripOpenHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        execSQL(db, TripLog.DATABASE_CREATE);
+        execSQL(db, TripTravel.DATABASE_CREATE);
     }
 
     @Override

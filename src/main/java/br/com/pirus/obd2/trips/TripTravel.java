@@ -12,16 +12,16 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import br.com.pirus.obd2.entity.EntityTripRecord;
+import br.com.pirus.obd2.entity.EntityTripTravel;
 
 /**
  * Some code taken from https://github.com/wdkapps/FillUp
  */
-public class TripLog {
+public class TripTravel {
 
 
     /// a tag string for debug logging (the name of this class)
-    private static final String TAG = TripLog.class.getName();
+    private static final String TAG = TripTravel.class.getName();
     /// database table names
     private static final String RECORDS_TABLE = "Records";
     /// SQL commands to delete the database
@@ -62,7 +62,7 @@ public class TripLog {
     };
 
     /// singleton instance
-    private static TripLog instance;
+    private static TripTravel instance;
     /// context of the instance creator
     private final Context context;
     /// a helper instance used to open and close the database
@@ -70,7 +70,7 @@ public class TripLog {
     /// the database
     private final SQLiteDatabase db;
 
-    private TripLog(Context context) {
+    private TripTravel(Context context) {
         this.context = context;
         this.helper = new TripOpenHelper(this.context);
         this.db = helper.getWritableDatabase();
@@ -82,9 +82,9 @@ public class TripLog {
      *
      * @return GasLog - singleton instance.
      */
-    public static TripLog getInstance(Context context) {
+    public static TripTravel getInstance(Context context) {
         if (instance == null) {
-            instance = new TripLog(context);
+            instance = new TripTravel(context);
         }
         return instance;
     }
@@ -106,11 +106,11 @@ public class TripLog {
         }
     }
 
-    public EntityTripRecord startTrip() {
+    public EntityTripTravel startTrip() {
         final String tag = TAG + ".createRecord()";
 
         try {
-            EntityTripRecord record = new EntityTripRecord();
+            EntityTripTravel record = new EntityTripTravel();
             long rowID = db.insertOrThrow(RECORDS_TABLE, null, getContentValues(record));
             record.setID((int) rowID);
             return record;
@@ -129,7 +129,7 @@ public class TripLog {
      * @param record - the TripRecord to update.
      * @return boolean flag indicating success/failure (true=success)
      */
-    public boolean updateRecord(EntityTripRecord record) {
+    public boolean updateRecord(EntityTripTravel record) {
         final String tag = TAG + ".updateRecord()";
         ASSERT((record.getID() != null), tag, "record id cannot be null");
         boolean success = false;
@@ -155,7 +155,7 @@ public class TripLog {
      * @param record - the GasRecord to convert.
      * @return a ContentValues instance representing the specified GasRecord.
      */
-    private ContentValues getContentValues(EntityTripRecord record) {
+    private ContentValues getContentValues(EntityTripTravel record) {
         ContentValues values = new ContentValues();
         values.put(RECORD_ID, record.getID());
         values.put(RECORD_START_DATE, record.getStartDate().getTime());
@@ -174,12 +174,12 @@ public class TripLog {
         db.execSQL(sql);
     }
 
-    public List<EntityTripRecord> readAllRecords() {
+    public List<EntityTripTravel> readAllRecords() {
 
         //update();
 
         final String tag = TAG + ".readAllRecords()";
-        List<EntityTripRecord> list = new ArrayList<>();
+        List<EntityTripTravel> list = new ArrayList<>();
         Cursor cursor = null;
 
         try {
@@ -197,7 +197,7 @@ public class TripLog {
             if (cursor != null) {
                 if (cursor.moveToFirst()) {
                     do {
-                        EntityTripRecord record = getRecordFromCursor(cursor);
+                        EntityTripTravel record = getRecordFromCursor(cursor);
                         list.add(record);
                     } while (cursor.moveToNext());
                 }
@@ -245,11 +245,11 @@ public class TripLog {
      * @param c - a Cursor containing results of a database query.
      * @return a GasRecord instance (null if no data).
      */
-    private EntityTripRecord getRecordFromCursor(Cursor c) {
+    private EntityTripTravel getRecordFromCursor(Cursor c) {
         final String tag = TAG + ".getRecordFromCursor()";
-        EntityTripRecord record = null;
+        EntityTripTravel record = null;
         if (c != null) {
-            record = new EntityTripRecord();
+            record = new EntityTripTravel();
             int id = c.getInt(c.getColumnIndex(RECORD_ID));
             long startDate = c.getLong(c.getColumnIndex(RECORD_START_DATE));
             long endTime = c.getLong(c.getColumnIndex(RECORD_END_DATE));

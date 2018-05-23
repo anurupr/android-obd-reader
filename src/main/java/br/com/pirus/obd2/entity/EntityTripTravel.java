@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
 
-public class EntityTripRecord {
+public class EntityTripTravel {
 
     /// record id for database use (primary key)
     private Integer id;
@@ -24,7 +24,7 @@ public class EntityTripRecord {
     private double consumption = 0;
 
 
-    public EntityTripRecord() {
+    public EntityTripTravel() {
         startDate = new Date();
     }
 

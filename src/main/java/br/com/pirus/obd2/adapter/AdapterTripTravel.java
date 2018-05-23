@@ -11,15 +11,15 @@ import java.util.Date;
 import java.util.List;
 
 import br.com.pirus.obd2.R;
-import br.com.pirus.obd2.entity.EntityTripRecord;
+import br.com.pirus.obd2.entity.EntityTripTravel;
 
-public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
+public class AdapterTripTravel extends ArrayAdapter<EntityTripTravel> {
 
     /// the Android Activity owning the ListView
     private final Activity activity;
 
     /// a list of trip records for display
-    private final List<EntityTripRecord> records;
+    private final List<EntityTripTravel> records;
 
     /**
      * DESCRIPTION:
@@ -28,7 +28,7 @@ public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
      * @param activity - the Android Activity instance that owns the ListView.
      * @param records  - the List of TripRecord instances for display in the ListView.
      */
-    public AdapterTripList(Activity activity, List<EntityTripRecord> records) {
+    public AdapterTripTravel(Activity activity, List<EntityTripTravel> records) {
         super(activity, R.layout.row_trip_list, records);
         this.activity = activity;
         this.records = records;
@@ -57,7 +57,7 @@ public class AdapterTripList extends ArrayAdapter<EntityTripRecord> {
         TextView rowOther = view.findViewById(R.id.rowOther);
 
         // populate row widgets from record data
-        EntityTripRecord record = records.get(position);
+        EntityTripTravel record = records.get(position);
 
         // date
         startDate.setText(record.getStartDateString());

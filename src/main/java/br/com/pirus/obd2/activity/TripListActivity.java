@@ -14,9 +14,9 @@ import android.widget.ListView;
 import java.util.List;
 
 import br.com.pirus.obd2.R;
-import br.com.pirus.obd2.adapter.AdapterTripList;
-import br.com.pirus.obd2.entity.EntityTripRecord;
-import br.com.pirus.obd2.trips.TripLog;
+import br.com.pirus.obd2.adapter.AdapterTripTravel;
+import br.com.pirus.obd2.entity.EntityTripTravel;
+import br.com.pirus.obd2.trips.TripTravel;
 
 import static br.com.pirus.obd2.activity.ConfirmDialog.createDialog;
 
@@ -28,9 +28,9 @@ import static br.com.pirus.obd2.activity.ConfirmDialog.createDialog;
 
 public class TripListActivity extends Activity implements ConfirmDialog.Listener {
 
-    private List<EntityTripRecord> records;
-    private TripLog triplog = null;
-    private AdapterTripList adapter = null;
+    private List<EntityTripTravel> records;
+    private TripTravel triplog = null;
+    private AdapterTripTravel adapter = null;
 
     /// the currently selected row from the list of records
     private int selectedRow;
@@ -43,9 +43,9 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
 
         ListView lv = findViewById(R.id.tripList);
 
-        triplog = TripLog.getInstance(this.getApplicationContext());
+        triplog = TripTravel.getInstance(this.getApplicationContext());
         records = triplog.readAllRecords();
-        adapter = new AdapterTripList(this, records);
+        adapter = new AdapterTripTravel(this, records);
         lv.setAdapter(adapter);
         registerForContextMenu(lv);
     }
@@ -103,12 +103,12 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
         selectedRow = (int) info.id;
 
         // get record that is currently selected
-        EntityTripRecord record = records.get(selectedRow);
+        EntityTripTravel record = records.get(selectedRow);
     }
 
     private void deleteTrip() {
         // get the record to delete from our list of records
-        EntityTripRecord record = records.get(selectedRow);
+        EntityTripTravel record = records.get(selectedRow);
 
         // attempt to remove the record from the log
         if (triplog.deleteTrip(record.getID())) {
@@ -151,7 +151,7 @@ public class TripListActivity extends Activity implements ConfirmDialog.Listener
     protected void deleteRow() {
 
         // get the record to delete from our list of records
-        EntityTripRecord record = records.get(selectedRow);
+        EntityTripTravel record = records.get(selectedRow);
 
         // attempt to remove the record from the log
         if (triplog.deleteTrip(record.getID())) {
