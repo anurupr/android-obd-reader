@@ -71,7 +71,7 @@
     <string name="pref_bluetooth_title">Enable Bluetooth</string>
     <string name="pref_bluetooth_summaryOff">Turn on Bluetooth</string>
     <string name="pref_bluetooth_summaryOn">Turn off Bluetooth</string>
-    <string name="pref_bluetooth_list_devices_summary">List of paired bluetooth devices.</string>
+    <string name="pref_bluetooth_list_devices_summary">List of paired bluetooth devices</string>
     <string name="pref_bluetooth_list_devices_title">Bluetooth Devices</string>
     <string name="pref_gps_category_title">Enable GPS</string>
     <string name="pref_gps_category_summaryOff">Turn on GPS</string>

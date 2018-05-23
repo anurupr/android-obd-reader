@@ -7,10 +7,12 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.NotificationManager;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -155,6 +157,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private long paramFuelTimeInterval = 0;
     private long paramFuelTime = 0;
     private long paramFuelPercent = 0;
+
+    private BTStateChangedBroadcastReceiver receiverBt;
+
     private final SensorEventListener orientListener = new SensorEventListener() {
 
         public void onSensorChanged(SensorEvent event) {
@@ -767,12 +772,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             btAdapter.disable();
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG, "Pausing..");
-        releaseWakeLockIfHeld();
-    }
+
 
     /**
      * If lock is held, release. Lock will be held when the service is running.
@@ -805,13 +805,14 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
     protected void onResume() {
         super.onResume();
+
         Log.d(TAG, "Resuming..");
         sensorManager.registerListener(orientListener, orientSensor,
                 SensorManager.SENSOR_DELAY_UI);
         wakeLock = powerManager.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK,
                 "ObdReader");
 
-        // get Bluetooth device
+/*        // get Bluetooth device
         final BluetoothAdapter btAdapter = BluetoothAdapter
                 .getDefaultAdapter();
 
@@ -825,8 +826,111 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
         } else {
             btStatusTextView.setText(getString(R.string.status_bluetooth_ok));
+        }*/
+
+
+        //register BroadcastReceiver
+
+        receiverBt = new BTStateChangedBroadcastReceiver();
+
+        registerReceiver(receiverBt, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        enableBluetooth();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG, "Pausing..");
+        releaseWakeLockIfHeld();
+
+        if (receiverBt != null) {
+            unregisterReceiver(receiverBt);
         }
     }
+
+
+    private void enableBluetooth() {
+
+        // get Bluetooth device
+        BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        boolean btEnable = prefs.getBoolean(ConfigActivity.ENABLE_BT_KEY, true);
+
+
+        if (btEnable && btAdapter != null) {
+            if (!btAdapter.isEnabled()) {
+                btAdapter.enable();
+            } else {
+                btStatusTextView.setText(getString(R.string.status_bluetooth_ok));
+                prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, true).apply();
+            }
+        } else {
+            btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
+            prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, false).apply();
+        }
+    }
+
+    public class BTStateChangedBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE,
+                    -1);
+
+            switch (state) {
+                case BluetoothAdapter.STATE_CONNECTED:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_CONNECTED",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_CONNECTING:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_CONNECTING",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_DISCONNECTED:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_DISCONNECTED",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_DISCONNECTING:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_DISCONNECTING",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_OFF:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_OFF",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_ON:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_ON",
+                            Toast.LENGTH_SHORT).show();*/
+
+                    btStatusTextView.setText(getString(R.string.status_bluetooth_ok));
+                    prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, true).apply();
+
+                    //getBoolean(ConfigActivity.ENABLE_BT_KEY
+                    break;
+                case BluetoothAdapter.STATE_TURNING_OFF:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF",
+                            Toast.LENGTH_SHORT).show();*/
+
+                    btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
+                    prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, false).apply();
+                    break;
+                case BluetoothAdapter.STATE_TURNING_ON:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_TURNING_ON",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+            }
+        }
+    }
+
 
     private void updateConfig() {
         startActivity(new Intent(this, ConfigActivity.class));
