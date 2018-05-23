@@ -4,7 +4,10 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -18,6 +21,7 @@ import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
+import android.preference.SwitchPreference;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -31,9 +35,7 @@ import br.com.pirus.obd2.R;
 import br.com.pirus.obd2.config.ObdConfig;
 import br.com.pirus.obd2.util.CalcOBD2;
 
-/**
- * Configuration com.github.pires.obd.reader.activity.
- */
+
 public class ConfigActivity extends PreferenceActivity implements OnPreferenceChangeListener {
 
     public static final String BLUETOOTH_LIST_KEY = "bluetooth_list_preference";
@@ -56,6 +58,11 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
     public static final String ENABLE_FULL_LOGGING_KEY = "enable_full_logging";
     public static final String DIRECTORY_FULL_LOGGING_KEY = "dirname_full_logging";
     public static final String DEV_EMAIL_KEY = "dev_email";
+
+    private BTStateChangedBroadcastReceiver btStateReceiver;
+
+    private SwitchPreference btSwitchEnable;
+    private ListPreference btPareidList;
 
     /**
      * @param prefs
@@ -227,23 +234,52 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
 
         checkGps();
 
-        ArrayList<CharSequence> pairedDeviceStrings = new ArrayList<>();
-        ArrayList<CharSequence> vals = new ArrayList<>();
-        ListPreference listBtDevices = (ListPreference) getPreferenceScreen()
-                .findPreference(BLUETOOTH_LIST_KEY);
+
         ArrayList<CharSequence> protocolStrings = new ArrayList<>();
         ArrayList<CharSequence> FuelStrings = new ArrayList<>();
+
         ListPreference listProtocols = (ListPreference) getPreferenceScreen()
                 .findPreference(PROTOCOLS_LIST_KEY);
+
         ListPreference listFuels = (ListPreference) getPreferenceScreen()
                 .findPreference(FUEL_LIST_KEY);
-        String[] prefKeys = new String[]{ENGINE_DISPLACEMENT_KEY,
-                VOLUMETRIC_EFFICIENCY_KEY, OBD_UPDATE_PERIOD_KEY, MAX_FUEL_ECON_KEY};
+
+        // ==============================================================
+
+        String[] prefKeys;
+
+        prefKeys = new String[]{
+                ENGINE_DISPLACEMENT_KEY,
+                VOLUMETRIC_EFFICIENCY_KEY,
+                OBD_UPDATE_PERIOD_KEY,
+                MAX_FUEL_ECON_KEY
+        };
+
         for (String prefKey : prefKeys) {
+
             EditTextPreference txtPref = (EditTextPreference) getPreferenceScreen()
                     .findPreference(prefKey);
+
             txtPref.setOnPreferenceChangeListener(this);
         }
+
+/*        prefKeys = new String[] { ENABLE_BT_KEY };
+
+        for (String prefKey : prefKeys) {
+
+            SwitchPreference txtPref = (SwitchPreference) getPreferenceScreen()
+                    .findPreference(prefKey);
+
+            txtPref.setOnPreferenceChangeListener(this);
+        }*/
+
+
+        btSwitchEnable = (SwitchPreference) getPreferenceScreen().findPreference(ENABLE_BT_KEY);
+        btPareidList = (ListPreference) getPreferenceScreen().findPreference(BLUETOOTH_LIST_KEY);
+
+        btSwitchEnable.setOnPreferenceChangeListener(this);
+
+        // =============================================================
 
         /*
          * Available OBD commands
@@ -253,6 +289,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         ArrayList<ObdCommand> cmds = ObdConfig.getCommands();
         PreferenceScreen cmdScr = (PreferenceScreen) getPreferenceScreen()
                 .findPreference(COMMANDS_SCREEN_KEY);
+
         for (ObdCommand cmd : cmds) {
             CheckBoxPreference cpref = new CheckBoxPreference(this);
             cpref.setTitle(cmd.getName());
@@ -284,12 +321,23 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         listFuels.setEntryValues(FuelStrings.toArray(new CharSequence[0]));
 
 
+        loadBtPareidList();
+    }
+
+    private void loadBtPareidList() {
+
+        ListPreference listBtDevices = (ListPreference) getPreferenceScreen()
+                .findPreference(BLUETOOTH_LIST_KEY);
+
+        ArrayList<CharSequence> pairedDeviceStrings = new ArrayList<>();
+        ArrayList<CharSequence> vals = new ArrayList<>();
 
         /*
          * Let's use this device Bluetooth adapter to select which paired OBD-II
          * compliant device we'll use.
          */
         final BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+
         if (mBtAdapter == null) {
             listBtDevices
                     .setEntries(pairedDeviceStrings.toArray(new CharSequence[0]));
@@ -302,6 +350,12 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
             return;
         }
 
+        if (!mBtAdapter.isEnabled()) {
+            btPareidList.setEnabled(false);
+        } else {
+            btPareidList.setEnabled(true);
+        }
+
         /*
          * Listen for preferences click.
          *
@@ -310,6 +364,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         final Activity thisActivity = this;
         listBtDevices.setEntries(new CharSequence[1]);
         listBtDevices.setEntryValues(new CharSequence[1]);
+
         listBtDevices.setOnPreferenceClickListener(new OnPreferenceClickListener() {
             public boolean onPreferenceClick(Preference preference) {
                 // see what I mean in the previous comment?
@@ -337,6 +392,21 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         listBtDevices.setEntryValues(vals.toArray(new CharSequence[0]));
     }
 
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        btStateReceiver = new BTStateChangedBroadcastReceiver();
+        registerReceiver(btStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(btStateReceiver);
+    }
+
     /**
      * OnPreferenceChangeListener method that will validate a preferencen new
      * value when it's changed.
@@ -344,6 +414,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
      * @param preference the changed preference
      * @param newValue   the value to be validated and set if valid
      */
+    @Override
     public boolean onPreferenceChange(Preference preference, Object newValue) {
 
         if (OBD_UPDATE_PERIOD_KEY.equals(preference.getKey())
@@ -360,8 +431,30 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
                         "Couldn't parse '" + newValue.toString() + "' as a number.",
                         Toast.LENGTH_LONG).show();
             }
+        } else if (preference instanceof SwitchPreference) {
+
+            SwitchPreference item = (SwitchPreference) preference;
+
+            switch (item.getKey()) {
+                case ENABLE_BT_KEY:
+
+                    BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
+
+                    if (newValue.equals(true)) {
+                        if (btAdapter != null && !btAdapter.enable()) {
+                            btAdapter.enable();
+                        }
+                    } else {
+                        if (btAdapter != null && btAdapter.enable()) {
+                            btAdapter.disable();
+                        }
+                    }
+
+                    break;
+            }
         }
-        return false;
+
+        return true;
     }
 
     private void checkGps() {
@@ -384,6 +477,63 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
         if (preferenceCategory != null) {
             preferenceCategory.removeAll();
             preferenceScreen.removePreference(preferenceCategory);
+        }
+    }
+
+    public class BTStateChangedBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1);
+
+            switch (state) {
+                case BluetoothAdapter.STATE_CONNECTED:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_CONNECTED",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_CONNECTING:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_CONNECTING",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_DISCONNECTED:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_DISCONNECTED",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_DISCONNECTING:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_DISCONNECTING",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_OFF:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_OFF",
+                            Toast.LENGTH_SHORT).show();*/
+
+                    btPareidList.setEnabled(false);
+                    break;
+                case BluetoothAdapter.STATE_ON:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_ON",
+                            Toast.LENGTH_SHORT).show();*/
+
+                    loadBtPareidList();
+
+                    //btPareidList.setEnabled(true);
+                    break;
+                case BluetoothAdapter.STATE_TURNING_OFF:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+                case BluetoothAdapter.STATE_TURNING_ON:
+/*                    Toast.makeText(context,
+                            "BTStateChangedBroadcastReceiver: STATE_TURNING_ON",
+                            Toast.LENGTH_SHORT).show();*/
+                    break;
+            }
         }
     }
 }

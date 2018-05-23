@@ -28,18 +28,21 @@
     <!-- ****************************************************************************** -->
 
     <PreferenceCategory android:title="@string/title_pref_bluetooth">
-        <CheckBoxPreference
+
+        <SwitchPreference
             android:defaultValue="false"
             android:dialogTitle="@string/pref_bluetooth_title"
             android:key="enable_bluetooth_preference"
             android:summaryOff="@string/pref_bluetooth_summaryOff"
             android:summaryOn="@string/pref_bluetooth_summaryOn"
             android:title="@string/pref_bluetooth_title" />
+
         <ListPreference
             android:dialogTitle="@string/pref_bluetooth_list_devices_title"
             android:key="bluetooth_list_preference"
             android:summary="@string/pref_bluetooth_list_devices_summary"
             android:title="@string/pref_bluetooth_list_devices_title" />
+
     </PreferenceCategory>
 
     <!-- ****************************************************************************** -->
