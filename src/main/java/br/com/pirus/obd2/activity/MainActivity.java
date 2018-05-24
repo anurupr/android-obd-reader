@@ -70,7 +70,6 @@ import br.com.pirus.obd2.config.ObdConfig;
 import br.com.pirus.obd2.entity.EntityTripTravel;
 import br.com.pirus.obd2.io.AbstractGatewayService;
 import br.com.pirus.obd2.io.LogCSVWriter;
-import br.com.pirus.obd2.io.MockObdGatewayService;
 import br.com.pirus.obd2.io.ObdCommandJob;
 import br.com.pirus.obd2.io.ObdGatewayService;
 import br.com.pirus.obd2.io.ObdProgressListener;
@@ -1169,13 +1168,10 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private void doBindService() {
         if (!isServiceBound) {
             Log.d(TAG, "Binding OBD service...");
+
             if (preRequisites) {
                 btStatusTextView.setText(getString(R.string.status_bluetooth_connecting));
                 Intent serviceIntent = new Intent(this, ObdGatewayService.class);
-                bindService(serviceIntent, serviceConn, Context.BIND_AUTO_CREATE);
-            } else {
-                btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
-                Intent serviceIntent = new Intent(this, MockObdGatewayService.class);
                 bindService(serviceIntent, serviceConn, Context.BIND_AUTO_CREATE);
             }
         }

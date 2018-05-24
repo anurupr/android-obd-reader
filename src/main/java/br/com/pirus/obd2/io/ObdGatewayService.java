@@ -236,8 +236,6 @@ public class ObdGatewayService extends AbstractGatewayService {
                     // log not new job
                     Log.e(TAG,
                             "Job state was not new, so it shouldn't be in queue. BUG ALERT!");
-            } catch (InterruptedException i) {
-                Thread.currentThread().interrupt();
             } catch (UnsupportedCommandException u) {
                 if (job != null) {
                     job.setState(ObdCommandJobState.NOT_SUPPORTED);

@@ -56,10 +56,6 @@
             android:name=".io.ObdGatewayService"
             android:exported="false"
             android:launchMode="singleInstance" />
-        <service
-            android:name=".io.MockObdGatewayService"
-            android:exported="false"
-            android:launchMode="singleInstance" />
     </application>
 
 </manifest>
