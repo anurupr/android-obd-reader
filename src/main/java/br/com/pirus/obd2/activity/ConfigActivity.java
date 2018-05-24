@@ -1,7 +1,6 @@
 package br.com.pirus.obd2.activity;
 
 import android.app.ActionBar;
-import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -17,7 +16,6 @@ import android.preference.EditTextPreference;
 import android.preference.ListPreference;
 import android.preference.Preference;
 import android.preference.Preference.OnPreferenceChangeListener;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceCategory;
 import android.preference.PreferenceScreen;
@@ -326,70 +324,41 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
 
     private void loadBtPareidList() {
 
-        ListPreference listBtDevices = (ListPreference) getPreferenceScreen()
-                .findPreference(BLUETOOTH_LIST_KEY);
+        /*
+         * Let's use this device Bluetooth adapter to select which paired OBD-II
+         * compliant device we'll use.
+         */
+        BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+
+
+        if (mBtAdapter != null && !mBtAdapter.isEnabled()) {
+            btSwitchEnable.setChecked(false);
+        } else {
+            btSwitchEnable.setChecked(true);
+        }
 
         ArrayList<CharSequence> pairedDeviceStrings = new ArrayList<>();
         ArrayList<CharSequence> vals = new ArrayList<>();
 
         /*
-         * Let's use this device Bluetooth adapter to select which paired OBD-II
-         * compliant device we'll use.
-         */
-        final BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
-
-        if (mBtAdapter == null) {
-            listBtDevices
-                    .setEntries(pairedDeviceStrings.toArray(new CharSequence[0]));
-            listBtDevices.setEntryValues(vals.toArray(new CharSequence[0]));
-
-            // we shouldn't get here, still warn user
-            Toast.makeText(this, "This device does not support Bluetooth.",
-                    Toast.LENGTH_LONG).show();
-
-            return;
-        }
-
-        if (!mBtAdapter.isEnabled()) {
-            btPareidList.setEnabled(false);
-        } else {
-            btPareidList.setEnabled(true);
-        }
-
-        /*
-         * Listen for preferences click.
-         *
-         * TODO there are so many repeated validations :-/
-         */
-        final Activity thisActivity = this;
-        listBtDevices.setEntries(new CharSequence[1]);
-        listBtDevices.setEntryValues(new CharSequence[1]);
-
-        listBtDevices.setOnPreferenceClickListener(new OnPreferenceClickListener() {
-            public boolean onPreferenceClick(Preference preference) {
-                // see what I mean in the previous comment?
-                if (mBtAdapter == null || !mBtAdapter.isEnabled()) {
-                    Toast.makeText(thisActivity,
-                            "This device does not support Bluetooth or it is disabled.",
-                            Toast.LENGTH_LONG).show();
-                    return false;
-                }
-                return true;
-            }
-        });
-
-        /*
          * Get paired devices and populate preference list.
          */
         Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+
         if (pairedDevices.size() > 0) {
+
             for (BluetoothDevice device : pairedDevices) {
                 pairedDeviceStrings.add(device.getName() + "\n" + device.getAddress());
                 vals.add(device.getAddress());
             }
+
+            btPareidList.setEnabled(true);
+        } else {
+            btPareidList.setEnabled(false);
         }
-        listBtDevices.setEntries(pairedDeviceStrings.toArray(new CharSequence[0]));
-        listBtDevices.setEntryValues(vals.toArray(new CharSequence[0]));
+
+        btPareidList.setEntries(pairedDeviceStrings.toArray(new CharSequence[0]));
+        btPareidList.setEntryValues(vals.toArray(new CharSequence[0]));
     }
 
 
@@ -399,12 +368,17 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
 
         btStateReceiver = new BTStateChangedBroadcastReceiver();
         registerReceiver(btStateReceiver, new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED));
+
+        loadBtPareidList();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        unregisterReceiver(btStateReceiver);
+
+        if (btStateReceiver != null) {
+            unregisterReceiver(btStateReceiver);
+        }
     }
 
     /**
@@ -512,7 +486,7 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
                             "BTStateChangedBroadcastReceiver: STATE_OFF",
                             Toast.LENGTH_SHORT).show();*/
 
-                    btPareidList.setEnabled(false);
+                    loadBtPareidList();
                     break;
                 case BluetoothAdapter.STATE_ON:
 /*                    Toast.makeText(context,
@@ -520,8 +494,6 @@ public class ConfigActivity extends PreferenceActivity implements OnPreferenceCh
                             Toast.LENGTH_SHORT).show();*/
 
                     loadBtPareidList();
-
-                    //btPareidList.setEnabled(true);
                     break;
                 case BluetoothAdapter.STATE_TURNING_OFF:
 /*                    Toast.makeText(context,
