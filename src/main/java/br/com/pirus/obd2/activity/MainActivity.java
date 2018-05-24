@@ -939,34 +939,34 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
             switch (state) {
                 case BluetoothAdapter.STATE_CONNECTED:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_CONNECTED",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
                 case BluetoothAdapter.STATE_CONNECTING:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_CONNECTING",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
                 case BluetoothAdapter.STATE_DISCONNECTED:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_DISCONNECTED",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
                 case BluetoothAdapter.STATE_DISCONNECTING:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_DISCONNECTING",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
                 case BluetoothAdapter.STATE_OFF:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_OFF",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
                 case BluetoothAdapter.STATE_ON:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_ON",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
 
                     btStatusTextView.setText(getString(R.string.status_bluetooth_ok));
                     //prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, true).apply();
@@ -974,17 +974,20 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     //getBoolean(ConfigActivity.ENABLE_BT_KEY
                     break;
                 case BluetoothAdapter.STATE_TURNING_OFF:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
+
+                    resetParams();
+                    stopLiveData();
 
                     btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
                     //prefs.edit().putBoolean(ConfigActivity.ENABLE_BT_KEY, false).apply();
                     break;
                 case BluetoothAdapter.STATE_TURNING_ON:
-                    Toast.makeText(context,
+/*                    Toast.makeText(context,
                             "BTStateChangedBroadcastReceiver: STATE_TURNING_ON",
-                            Toast.LENGTH_SHORT).show();
+                            Toast.LENGTH_SHORT).show();*/
                     break;
             }
         }
