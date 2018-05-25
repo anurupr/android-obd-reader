@@ -3,11 +3,6 @@ package br.com.pirus.obd2.io;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
-import android.content.Context;
-import android.content.Intent;
-import android.net.Uri;
-import android.os.Build;
-import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -20,7 +15,6 @@ import com.github.pires.obd.commands.temperature.AmbientAirTemperatureCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 import com.github.pires.obd.exceptions.UnsupportedCommandException;
 
-import java.io.File;
 import java.io.IOException;
 
 import br.com.pirus.obd2.R;
@@ -42,13 +36,15 @@ public class ObdGatewayService extends AbstractGatewayService {
 
     private static final String TAG = ObdGatewayService.class.getName();
 
+    private Thread mThread = null;
+
     //@Inject
     //SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
     private BluetoothDevice dev = null;
     private BluetoothSocket sock = null;
 
-    public static void saveLogcatToFile(Context context, String devemail) {
+/*    public static void saveLogcatToFile(Context context, String devemail) {
         Intent emailIntent = new Intent(Intent.ACTION_SEND);
         emailIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         emailIntent.setType("text/plain");
@@ -81,7 +77,7 @@ public class ObdGatewayService extends AbstractGatewayService {
                 e.printStackTrace();
             }
         }
-    }
+    }*/
 
     public void startService() {
 
@@ -89,6 +85,7 @@ public class ObdGatewayService extends AbstractGatewayService {
 
         // get the remote Bluetooth device
         final String remoteDevice = prefs.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
+
         if (remoteDevice == null || "".equals(remoteDevice)) {
             Toast.makeText(ctx, getString(R.string.text_bluetooth_nodevice), Toast.LENGTH_LONG).show();
 
@@ -146,29 +143,40 @@ public class ObdGatewayService extends AbstractGatewayService {
      * <p/>
      * See http://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3/18786701#18786701
      *
-     * @throws IOException
+     * @throws Exception
      */
-    private void startObdConnection() throws IOException {
+    private void startObdConnection() throws Exception {
         Log.d(TAG, "Starting OBD connection..");
+
         isRunning = true;
+
         try {
             sock = BluetoothManager.connect(dev);
-        } catch (Exception e2) {
-            Log.e(TAG, "There was an error while establishing Bluetooth connection. Stopping app..", e2);
+        } catch (Exception e) {
+            //Log.e(TAG, "There was an error while establishing Bluetooth connection. Stopping app..", e2);
+
+            Toast.makeText(
+                    ctx,
+                    "There was an error while establishing Bluetooth connection. Stopping app..",
+                    Toast.LENGTH_SHORT
+            ).show();
+
+
             stopService();
-            throw new IOException();
+            throw new Exception();
         }
 
         // Let's configure the connection.
         Log.d(TAG, "Queueing jobs for connection configuration..");
+
         queueJob(new ObdCommandJob(new ObdResetCommand()));
 
         //Below is to give the adapter enough time to reset before sending the commands, otherwise the first startup commands could be ignored.
-        try {
+/*        try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
-        }
+        }*/
 
         queueJob(new ObdCommandJob(new EchoOffCommand()));
 
@@ -191,8 +199,6 @@ public class ObdGatewayService extends AbstractGatewayService {
 
         queueCounter = 0L;
         Log.d(TAG, "Initialization jobs queued.");
-
-
     }
 
     /**
@@ -215,8 +221,10 @@ public class ObdGatewayService extends AbstractGatewayService {
      */
     protected void executeQueue() {
         Log.d(TAG, "Executing queue..");
+
         while (!Thread.currentThread().isInterrupted()) {
             ObdCommandJob job = null;
+
             try {
                 job = jobsQueue.take();
 
@@ -258,6 +266,7 @@ public class ObdGatewayService extends AbstractGatewayService {
 
             if (job != null) {
                 final ObdCommandJob job2 = job;
+
                 ((MainActivity) ctx).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {

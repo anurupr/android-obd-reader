@@ -21,11 +21,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import br.com.pirus.obd2.activity.MainActivity;
 
 //import com.google.inject.Inject;
-
 //import roboguice.service.RoboService;
 
-
 public abstract class AbstractGatewayService extends Service {
+
     public static final int NOTIFICATION_ID = 1;
     private static final String TAG = AbstractGatewayService.class.getName();
     private final IBinder binder = new AbstractGatewayServiceBinder();

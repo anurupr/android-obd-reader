@@ -4,8 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.UUID;
 
 public class BluetoothManager {
@@ -29,31 +27,14 @@ public class BluetoothManager {
      *
      * @param dev The remote device to connect to
      * @return The BluetoothSocket
-     * @throws IOException
+     * @throws Exception
      */
-    public static BluetoothSocket connect(BluetoothDevice dev) throws IOException {
-        BluetoothSocket sock = null;
-        BluetoothSocket sockFallback = null;
+    public static BluetoothSocket connect(BluetoothDevice dev) throws Exception {
+        Log.d(TAG, "Starting Bluetooth connection...");
 
-        Log.d(TAG, "Starting Bluetooth connection..");
-        try {
-            sock = dev.createRfcommSocketToServiceRecord(MY_UUID);
-            sock.connect();
-        } catch (Exception e1) {
-            Log.e(TAG, "There was an error while establishing Bluetooth connection. Falling back..", e1);
-            Class<?> clazz = sock.getRemoteDevice().getClass();
-            Class<?>[] paramTypes = new Class<?>[]{Integer.TYPE};
-            try {
-                Method m = clazz.getMethod("createRfcommSocket", paramTypes);
-                Object[] params = new Object[]{Integer.valueOf(1)};
-                sockFallback = (BluetoothSocket) m.invoke(sock.getRemoteDevice(), params);
-                sockFallback.connect();
-                sock = sockFallback;
-            } catch (Exception e2) {
-                Log.e(TAG, "Couldn't fallback while establishing Bluetooth connection.", e2);
-                throw new IOException(e2.getMessage());
-            }
-        }
-        return sock;
+        BluetoothSocket mSocket = dev.createRfcommSocketToServiceRecord(MY_UUID);
+        mSocket.connect();
+
+        return mSocket;
     }
 }

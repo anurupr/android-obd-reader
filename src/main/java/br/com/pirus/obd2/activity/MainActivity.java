@@ -10,7 +10,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
@@ -1041,13 +1040,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         Log.d(TAG, "Stopping live data..");
 
         gpsStop();
-
         doUnbindService();
         endTrip();
-
         releaseWakeLockIfHeld();
 
-        final String devemail = prefs.getString(ConfigActivity.DEV_EMAIL_KEY, null);
+       /* final String devemail = prefs.getString(ConfigActivity.DEV_EMAIL_KEY, null);
 
         if (devemail != null && !devemail.isEmpty()) {
 
@@ -1069,11 +1066,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             AlertDialog.Builder builder = new AlertDialog.Builder(this);
             builder.setMessage("Where there issues?\nThen please send us the logs.\nSend Logs?").setPositiveButton("Yes", dialogClickListener)
                     .setNegativeButton("No", dialogClickListener).show();
-        }
+        }*/
 
-        if (myCSVWriter != null) {
+/*        if (myCSVWriter != null) {
             myCSVWriter.closeLogCSVWriter();
-        }
+        }*/
     }
 
     protected void endTrip() {
