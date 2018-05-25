@@ -188,7 +188,7 @@ public class ObdGatewayService extends AbstractGatewayService {
          */
         queueJob(new ObdCommandJob(new EchoOffCommand()));
         queueJob(new ObdCommandJob(new LineFeedOffCommand()));
-        queueJob(new ObdCommandJob(new TimeoutCommand(62)));
+        queueJob(new ObdCommandJob(new TimeoutCommand(100)));
 
         // Get protocol from preferences
         final String protocol = prefs.getString(ConfigActivity.PROTOCOLS_LIST_KEY, "AUTO");
@@ -219,7 +219,7 @@ public class ObdGatewayService extends AbstractGatewayService {
     /**
      * Runs the queue until the service is stopped
      */
-    protected void executeQueue() {
+    protected void executeQueue() throws InterruptedException {
         Log.d(TAG, "Executing queue..");
 
         while (!Thread.currentThread().isInterrupted()) {
@@ -274,6 +274,8 @@ public class ObdGatewayService extends AbstractGatewayService {
                     }
                 });
             }
+
+            Thread.sleep(6000);
         }
     }
 

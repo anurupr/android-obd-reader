@@ -41,6 +41,7 @@ public abstract class AbstractGatewayService extends Service {
 
     // Run the executeQueue in a different thread to lighten the UI thread
     Thread t = new Thread(new Runnable() {
+
         @Override
         public void run() {
             try {

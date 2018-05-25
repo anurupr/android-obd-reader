@@ -69,6 +69,7 @@ import br.com.pirus.obd2.config.ObdConfig;
 import br.com.pirus.obd2.entity.EntityTripTravel;
 import br.com.pirus.obd2.io.AbstractGatewayService;
 import br.com.pirus.obd2.io.LogCSVWriter;
+import br.com.pirus.obd2.io.ObdBluetoothService;
 import br.com.pirus.obd2.io.ObdCommandJob;
 import br.com.pirus.obd2.io.ObdGatewayService;
 import br.com.pirus.obd2.io.ObdProgressListener;
@@ -111,6 +112,11 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int FUEL_LIST = 12;
     private static final int REQUEST_ENABLE_BT = 13;
     private static final int REQUEST_PERMISSIONS = 14;
+
+
+    public static MainActivity instance;
+
+    private Intent mIntentBluetooth;
 
     // 1 minute
     // 60000
@@ -655,6 +661,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        instance = this;
+
         // -------------------------------------------------------------------
 
         compass = findViewById(R.id.compass_text);
@@ -877,7 +885,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case START_LIVE_DATA:
-                resetParams();
+/*                resetParams();
                 stopLiveData();
 
                 BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -890,11 +898,17 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                             "Bluetooth disable",
                             Toast.LENGTH_SHORT
                     ).show();
-                }
+                }*/
+
+
+                startService(new Intent(this, ObdBluetoothService.class));
 
                 return true;
             case STOP_LIVE_DATA:
-                stopLiveData();
+                //stopLiveData();
+                //startService(mIntentBluetooth);
+                //Intent mIntent = new Intent(this, ObdBluetoothService.class);
+                stopService(new Intent(this, ObdBluetoothService.class));
                 return true;
             case SETTINGS:
                 updateConfig();

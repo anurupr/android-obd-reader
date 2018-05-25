@@ -20,13 +20,11 @@ public class BluetoothManager {
      */
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
+
     /**
-     * Instantiates a BluetoothSocket for the remote device and connects it.
-     * <p/>
-     * See http://stackoverflow.com/questions/18657427/ioexception-read-failed-socket-might-closed-bluetooth-on-android-4-3/18786701#18786701
      *
-     * @param dev The remote device to connect to
-     * @return The BluetoothSocket
+     * @param dev
+     * @return
      * @throws Exception
      */
     public static BluetoothSocket connect(BluetoothDevice dev) throws Exception {
