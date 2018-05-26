@@ -18,9 +18,9 @@ import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.enums.ObdProtocols;
 
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.UUID;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import br.com.pirus.obd2.activity.ConfigActivity;
 import br.com.pirus.obd2.activity.MainActivity;
@@ -36,8 +36,10 @@ public class ObdBluetoothService extends Service {
     private BluetoothDevice mDevice;
     private BluetoothSocket mSocket;
 
+    private boolean isRunnig = false;
+
     private Long queueCounter = 0L;
-    private BlockingQueue<ObdCommandJob> jobsQueue = new LinkedBlockingQueue<>();
+    private ArrayList<ObdCommand> mQueueCommands = new ArrayList<>();
 
     private Thread workerThread = new Thread(new Runnable() {
 
@@ -57,6 +59,7 @@ public class ObdBluetoothService extends Service {
     private void onStart() throws Exception {
         mContext = MainActivity.instance;
         mPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        isRunnig = true;
 
         String device = mPreferences.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
 
@@ -87,23 +90,23 @@ public class ObdBluetoothService extends Service {
         String protocol = mPreferences.getString(ConfigActivity.PROTOCOLS_LIST_KEY, "AUTO");
 
         //queueJob(new ObdCommandJob(new ObdResetCommand()));
-        queueJob(new ObdCommandJob(new TimeoutCommand(100)));
-        queueJob(new ObdCommandJob(new EchoOffCommand()));
-        queueJob(new ObdCommandJob(new LineFeedOffCommand()));
-        queueJob(new ObdCommandJob(new SelectProtocolCommand(ObdProtocols.valueOf(protocol))));
+        mQueueCommands.add((new TimeoutCommand(125)));
+        mQueueCommands.add((new EchoOffCommand()));
+        mQueueCommands.add((new LineFeedOffCommand()));
+        mQueueCommands.add((new SelectProtocolCommand(ObdProtocols.valueOf(protocol))));
 
-        for (ObdCommandJob job : jobsQueue) {
+
+        for (ObdCommand cmd : mQueueCommands) {
             try {
-                job.getCommand().run(mSocket.getInputStream(), mSocket.getOutputStream());
+                cmd.run(mSocket.getInputStream(), mSocket.getOutputStream());
             } catch (Exception e) {
-                job.setState(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR);
-                Log.e(TAG, "Failed to run command: " + job.getCommand().getName());
+                Log.e(TAG, "Failed to run command: " + cmd.getName());
                 onFinish();
                 return;
             }
         }
 
-        jobsQueue.clear();
+        //mQueueCommands.clear();
         onExecute();
     }
 
@@ -113,19 +116,19 @@ public class ObdBluetoothService extends Service {
 
         queueCommands();
 
-        while (workerThread.isAlive()) {
-            for (final ObdCommandJob job : jobsQueue) {
+        while (isRunnig) {
+            for (final ObdCommand cmd : mQueueCommands) {
 
                 try {
-                    job.getCommand().run(mSocket.getInputStream(), mSocket.getOutputStream());
+                    cmd.run(mSocket.getInputStream(), mSocket.getOutputStream());
                 } catch (Exception e) {
-                    Log.e(TAG, "Failed to run command: " + job.getCommand().getName());
+                    Log.e(TAG, "Failed to run command: " + cmd.getName());
                 }
 
                 ((MainActivity) mContext).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((MainActivity) mContext).stateUpdate(job);
+                        ((MainActivity) mContext).stateUpdate(cmd);
                     }
                 });
             }
@@ -134,36 +137,40 @@ public class ObdBluetoothService extends Service {
 
     private void onFinish() {
         Log.e("onFinish", "onFinish");
+
+        isRunnig = false;
         workerThread.interrupt();
+
+        try {
+            mSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
         stopSelf();
     }
 
-    public void queueJob(ObdCommandJob job) {
+/*    public void queueJob(ObdCommand cmd) {
 
         // This is a good place to enforce the imperial units option
-        job.getCommand().useImperialUnits(mPreferences.getBoolean(ConfigActivity.IMPERIAL_UNITS_KEY, false));
+        //cmd.useImperialUnits(mPreferences.getBoolean(ConfigActivity.IMPERIAL_UNITS_KEY, false));
 
-        queueCounter++;
-        Log.d(TAG, "Adding job[" + queueCounter + "] to queue..");
 
-        job.setId(queueCounter);
+        //Log.d(TAG, "Adding job[" + queueCounter + "] to queue..");
 
-        try {
-            jobsQueue.put(job);
-            Log.d(TAG, "Job queued successfully.");
-        } catch (InterruptedException e) {
-            job.setState(ObdCommandJob.ObdCommandJobState.QUEUE_ERROR);
-            Log.e(TAG, "Failed to queue job.");
-        }
-    }
+        //cmd.setId(queueCounter);
+
+            mQueueCommands.add(cmd);
+            //jobsQueue.put(job);
+    }*/
 
     private void queueCommands() {
+        mQueueCommands.clear();
+
         for (ObdCommand Command : ObdConfig.getCommands()) {
             if (mPreferences.getBoolean(Command.getName(), true))
-                queueJob(new ObdCommandJob(Command));
+                mQueueCommands.add((Command));
         }
-
-
     }
 
     @Override
@@ -182,10 +189,26 @@ public class ObdBluetoothService extends Service {
         return START_STICKY;
     }
 
+    @Override
+    public boolean onUnbind(Intent intent) {
+        //return super.onUnbind(intent);
+
+        Log.d("onUnbind", "onUnbind");
+        Log.d("onUnbind", "onUnbind");
+        Log.d("onUnbind", "onUnbind");
+
+        onFinish();
+        return true;
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
+
+        Log.d("onDestroy", "onDestroy");
+        Log.d("onDestroy", "onDestroy");
+        Log.d("onDestroy", "onDestroy");
+
         onFinish();
     }
 

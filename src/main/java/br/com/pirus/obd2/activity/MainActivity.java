@@ -58,7 +58,6 @@ import com.github.pires.obd.enums.AvailableCommandNames;
 
 import java.io.IOException;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -338,12 +337,12 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         });
     }
 
-    public void stateUpdate(final ObdCommandJob job) {
-        final String cmdName = job.getCommand().getName();
-        String cmdResult = "";
+    public void stateUpdate(final ObdCommand cmd) {
+        final String cmdName = cmd.getName();
+        final String cmdResult = cmd.getFormattedResult();
         final String cmdID = LookUpCommand(cmdName);
 
-        if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
+/*        if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
             cmdResult = job.getCommand().getResult();
             if (cmdResult != null && isServiceBound) {
                 obdStatusTextView.setText(cmdResult.toLowerCase());
@@ -357,7 +356,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             cmdResult = job.getCommand().getFormattedResult();
             if (isServiceBound)
                 obdStatusTextView.setText(getString(R.string.status_obd_data));
-        }
+        }*/
 
         if (cmdID != null && cmdName != null && cmdResult != null) {
             if (!cmdID.equals("") && !cmdName.equals("") && !cmdResult.equals("")) {
@@ -377,7 +376,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 */
 
 
-                setConsumptionParams(cmdID, job.getCommand());
+                setConsumptionParams(cmdID, cmd);
 
                 if (vv.findViewWithTag(cmdID) != null) {
                     TextView existingTV = vv.findViewWithTag(cmdID);
@@ -385,7 +384,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                 } else addTableRow(cmdID, cmdName, cmdResult);
 
                 commandResult.put(cmdID, cmdResult);
-                updateTripStatistic(job, cmdID);
+                updateTripStatistic(cmd, cmdID);
             }
         }
     }
@@ -637,20 +636,20 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         // todo disable gps controls into Preferences
     }
 
-    private void updateTripStatistic(final ObdCommandJob job, final String cmdID) {
+    private void updateTripStatistic(final ObdCommand cmd, final String cmdID) {
 
         if (currentTrip != null) {
             if (cmdID.equals(AvailableCommandNames.SPEED.toString())) {
-                SpeedCommand command = (SpeedCommand) job.getCommand();
+                SpeedCommand command = (SpeedCommand) cmd;
                 currentTrip.setSpeedMax(command.getMetricSpeed());
                 currentTrip.setConsumption(Double.parseDouble(consumptionAverage.
                         replace(",", ".")));
 
             } else if (cmdID.equals(AvailableCommandNames.ENGINE_RPM.toString())) {
-                RPMCommand command = (RPMCommand) job.getCommand();
+                RPMCommand command = (RPMCommand) cmd;
                 currentTrip.setEngineRpmMax(command.getRPM());
             } else if (cmdID.endsWith(AvailableCommandNames.ENGINE_RUNTIME.toString())) {
-                RuntimeCommand command = (RuntimeCommand) job.getCommand();
+                RuntimeCommand command = (RuntimeCommand) cmd;
                 currentTrip.setEngineRuntime(command.getFormattedResult());
             }
         }
@@ -900,15 +899,13 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     ).show();
                 }*/
 
-
-                startService(new Intent(this, ObdBluetoothService.class));
-
+                startLiveData();
                 return true;
             case STOP_LIVE_DATA:
-                //stopLiveData();
+                stopLiveData();
                 //startService(mIntentBluetooth);
                 //Intent mIntent = new Intent(this, ObdBluetoothService.class);
-                stopService(new Intent(this, ObdBluetoothService.class));
+
                 return true;
             case SETTINGS:
                 updateConfig();
@@ -940,6 +937,94 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         menu.add(0, SETTINGS, 0, getString(R.string.menu_settings));
 
         return true;
+    }
+
+    private void startLiveData() {
+        Log.d(TAG, "Starting live data..");
+        resetParams();
+
+        tl.removeAllViews(); //start fresh
+        //doBindService();
+        startService(new Intent(this, ObdBluetoothService.class));
+
+        currentTrip = triplog.startTrip();
+
+
+        if (currentTrip == null)
+            showDialog(SAVE_TRIP_NOT_AVAILABLE);
+
+        // start command execution
+        //new Handler().post(mQueueCommands);
+
+        if (prefs.getBoolean(ConfigActivity.ENABLE_GPS_KEY, false))
+            gpsStart();
+        else
+            gpsStatusTextView.setText(getString(R.string.status_gps_not_used));
+
+        // screen won't turn off until wakeLock.release()
+        //wakeLock.acquire();
+
+/*        if (prefs.getBoolean(ConfigActivity.ENABLE_FULL_LOGGING_KEY, false)) {
+
+            // Create the CSV Logger
+            long mils = System.currentTimeMillis();
+            SimpleDateFormat sdf = new SimpleDateFormat("_dd_MM_yyyy_HH_mm_ss");
+
+            try {
+                myCSVWriter = new LogCSVWriter("Log" + sdf.format(new Date(mils)).toString() + ".csv",
+                        prefs.getString(ConfigActivity.DIRECTORY_FULL_LOGGING_KEY,
+                                getString(R.string.default_dirname_full_logging))
+                );
+
+            } catch (RuntimeException e) {
+                Log.e(TAG, "Can't enable logging to file.", e);
+            }
+        }*/
+    }
+
+    private void getTroubleCodes() {
+        startActivity(new Intent(this, TroubleCodesActivity.class));
+    }
+
+    private void stopLiveData() {
+        Log.d(TAG, "Stopping live data..");
+
+        //gpsStop();
+        //doUnbindService();
+
+        endTrip();
+
+        stopService(new Intent(this, ObdBluetoothService.class));
+
+        //releaseWakeLockIfHeld();
+
+       /* final String devemail = prefs.getString(ConfigActivity.DEV_EMAIL_KEY, null);
+
+        if (devemail != null && !devemail.isEmpty()) {
+
+            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch (which) {
+                        case DialogInterface.BUTTON_POSITIVE:
+                            ObdGatewayService.saveLogcatToFile(getApplicationContext(), devemail);
+                            break;
+
+                        case DialogInterface.BUTTON_NEGATIVE:
+                            //No button clicked
+                            break;
+                    }
+                }
+            };
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setMessage("Where there issues?\nThen please send us the logs.\nSend Logs?").setPositiveButton("Yes", dialogClickListener)
+                    .setNegativeButton("No", dialogClickListener).show();
+        }*/
+
+/*        if (myCSVWriter != null) {
+            myCSVWriter.closeLogCSVWriter();
+        }*/
     }
 
     public class BTStateChangedBroadcastReceiver extends BroadcastReceiver {
@@ -990,7 +1075,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                             "BTStateChangedBroadcastReceiver: STATE_TURNING_OFF",
                             Toast.LENGTH_SHORT).show();*/
 
-                    resetParams();
+                    //resetParams();
                     stopLiveData();
 
                     btStatusTextView.setText(getString(R.string.status_bluetooth_disabled));
@@ -1003,88 +1088,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
                     break;
             }
         }
-    }
-
-    private void getTroubleCodes() {
-        startActivity(new Intent(this, TroubleCodesActivity.class));
-    }
-
-    private void startLiveData() {
-        Log.d(TAG, "Starting live data..");
-
-        tl.removeAllViews(); //start fresh
-        doBindService();
-
-        currentTrip = triplog.startTrip();
-
-
-        if (currentTrip == null)
-            showDialog(SAVE_TRIP_NOT_AVAILABLE);
-
-        // start command execution
-        new Handler().post(mQueueCommands);
-
-        if (prefs.getBoolean(ConfigActivity.ENABLE_GPS_KEY, false))
-            gpsStart();
-        else
-            gpsStatusTextView.setText(getString(R.string.status_gps_not_used));
-
-        // screen won't turn off until wakeLock.release()
-        wakeLock.acquire();
-
-        if (prefs.getBoolean(ConfigActivity.ENABLE_FULL_LOGGING_KEY, false)) {
-
-            // Create the CSV Logger
-            long mils = System.currentTimeMillis();
-            SimpleDateFormat sdf = new SimpleDateFormat("_dd_MM_yyyy_HH_mm_ss");
-
-            try {
-                myCSVWriter = new LogCSVWriter("Log" + sdf.format(new Date(mils)).toString() + ".csv",
-                        prefs.getString(ConfigActivity.DIRECTORY_FULL_LOGGING_KEY,
-                                getString(R.string.default_dirname_full_logging))
-                );
-
-            } catch (RuntimeException e) {
-                Log.e(TAG, "Can't enable logging to file.", e);
-            }
-        }
-    }
-
-    private void stopLiveData() {
-        Log.d(TAG, "Stopping live data..");
-
-        gpsStop();
-        doUnbindService();
-        endTrip();
-        releaseWakeLockIfHeld();
-
-       /* final String devemail = prefs.getString(ConfigActivity.DEV_EMAIL_KEY, null);
-
-        if (devemail != null && !devemail.isEmpty()) {
-
-            DialogInterface.OnClickListener dialogClickListener = new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    switch (which) {
-                        case DialogInterface.BUTTON_POSITIVE:
-                            ObdGatewayService.saveLogcatToFile(getApplicationContext(), devemail);
-                            break;
-
-                        case DialogInterface.BUTTON_NEGATIVE:
-                            //No button clicked
-                            break;
-                    }
-                }
-            };
-
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setMessage("Where there issues?\nThen please send us the logs.\nSend Logs?").setPositiveButton("Yes", dialogClickListener)
-                    .setNegativeButton("No", dialogClickListener).show();
-        }*/
-
-/*        if (myCSVWriter != null) {
-            myCSVWriter.closeLogCSVWriter();
-        }*/
     }
 
     protected void endTrip() {

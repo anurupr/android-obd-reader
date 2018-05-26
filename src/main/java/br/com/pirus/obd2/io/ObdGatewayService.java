@@ -270,7 +270,7 @@ public class ObdGatewayService extends AbstractGatewayService {
                 ((MainActivity) ctx).runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        ((MainActivity) ctx).stateUpdate(job2);
+                        //((MainActivity) ctx).stateUpdate(job2);
                     }
                 });
             }
