@@ -33,7 +33,7 @@ public class CalcOBD2 {
         if (throttlePosition < 0 || vehicleSpeed < 1)
             return 0;
 
-        double massAirFlow = ((bhp / 1.25) * (throttlePosition / 100)) * 0.30;
+        double massAirFlow = ((bhp / 1.25) * (throttlePosition / 100)) * 0.50;
 
         if (massAirFlow <= 0)
             return 0;
@@ -55,7 +55,7 @@ public class CalcOBD2 {
             return 0;
 
 
-        double massAirFlow = ((bhp / 1.25) * (rpm / 7000)) * 0.30;
+        double massAirFlow = ((bhp / 1.25) * (rpm / 7000)) * 0.50;
 
 
         if (massAirFlow <= 0)
