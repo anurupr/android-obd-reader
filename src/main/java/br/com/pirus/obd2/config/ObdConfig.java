@@ -59,11 +59,7 @@ public final class ObdConfig {
         // Fuel
         cmds.add(new FindFuelTypeCommand());
         cmds.add(new ConsumptionRateCommand());
-        // cmds.add(new AverageFuelEconomyObdCommand());
-        //cmds.add(new FuelEconomyCommand());
         cmds.add(new FuelLevelCommand());
-        // cmds.add(new FuelEconomyMAPObdCommand());
-        // cmds.add(new FuelEconomyCommandedMAPObdCommand());
         cmds.add(new FuelTrimCommand(FuelTrim.LONG_TERM_BANK_1));
         cmds.add(new FuelTrimCommand(FuelTrim.LONG_TERM_BANK_2));
         cmds.add(new FuelTrimCommand(FuelTrim.SHORT_TERM_BANK_1));
