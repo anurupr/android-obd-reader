@@ -122,7 +122,6 @@ public class ObdBluetoothService extends Service {
         public void run() {
             try {
                 start();
-                loop();
                 //close();
             } catch (Exception e) {
                 e.printStackTrace();
@@ -149,7 +148,8 @@ public class ObdBluetoothService extends Service {
         return START_STICKY;
     }
 
-    private synchronized void start() throws Exception {
+
+    private void start() throws Exception {
         Log.d(TAG, "start...");
 
         running = true;
@@ -196,10 +196,6 @@ public class ObdBluetoothService extends Service {
             if (mPreferences.getBoolean(Command.getName(), true))
                 mLoopQueueCommands.add((Command));
         }
-    }
-
-
-    private void loop() {
 
         while (running) {
             Log.d(TAG, "loop...");
@@ -216,7 +212,6 @@ public class ObdBluetoothService extends Service {
                     Log.d(TAG, "Exception");
                     //e.printStackTrace();
                 }
-
 
                 ((MainActivity) mContext).runOnUiThread(new Runnable() {
                     @Override
