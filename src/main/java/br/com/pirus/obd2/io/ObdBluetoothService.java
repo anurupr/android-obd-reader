@@ -37,6 +37,7 @@ import com.github.pires.obd.commands.pressure.FuelRailPressureCommand;
 import com.github.pires.obd.commands.pressure.IntakeManifoldPressureCommand;
 import com.github.pires.obd.commands.protocol.EchoOffCommand;
 import com.github.pires.obd.commands.protocol.LineFeedOffCommand;
+import com.github.pires.obd.commands.protocol.ObdResetCommand;
 import com.github.pires.obd.commands.protocol.SelectProtocolCommand;
 import com.github.pires.obd.commands.protocol.TimeoutCommand;
 import com.github.pires.obd.commands.temperature.AirIntakeTemperatureCommand;
@@ -55,15 +56,14 @@ import br.com.pirus.obd2.activity.MainActivity;
 public class ObdBluetoothService extends Service {
 
     private static final String TAG = ObdBluetoothService.class.getName();
-
     private volatile boolean running = false;
 
     private Context mContext;
-    private SharedPreferences mPreferences;
     private BluetoothSocket mSocket;
 
 
     private ArrayList<ObdCommand> mBootQueueCommands = new ArrayList<ObdCommand>() {{
+        add((new ObdResetCommand()));
         add((new TimeoutCommand(125)));
         add((new EchoOffCommand()));
         add((new LineFeedOffCommand()));
@@ -122,10 +122,9 @@ public class ObdBluetoothService extends Service {
         public void run() {
             try {
                 start();
-                //close();
             } catch (Exception e) {
                 e.printStackTrace();
-                running = false;
+                close();
             }
         }
     });
@@ -139,10 +138,12 @@ public class ObdBluetoothService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         //return super.onStartCommand(intent, flags, startId);
 
+        running = true;
+        mContext = MainActivity.instance;
+
         if (mWorkerThread != null && !mWorkerThread.isAlive()) {
             mWorkerThread.setPriority(Thread.MAX_PRIORITY);
             mWorkerThread.start();
-
         }
 
         return START_STICKY;
@@ -152,42 +153,48 @@ public class ObdBluetoothService extends Service {
     private void start() throws Exception {
         Log.d(TAG, "start...");
 
-        running = true;
-
-        mContext = MainActivity.instance;
-        mPreferences = PreferenceManager.getDefaultSharedPreferences(getBaseContext());
+        SharedPreferences mPreferences =
+                PreferenceManager.getDefaultSharedPreferences(getBaseContext());
 
         String device = mPreferences.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
 
         if (device == null || device.equals("")) {
+            close();
             throw new Exception("No Bluetooth device has been selected.");
         }
 
         BluetoothAdapter btAdapter = BluetoothAdapter.getDefaultAdapter();
 
         if (btAdapter == null || !btAdapter.isEnabled()) {
+            close();
             throw new Exception("No Bluetooth enable.");
         }
 
         mSocket = btAdapter.getRemoteDevice(device).createInsecureRfcommSocketToServiceRecord(
                 UUID.fromString("00001101-0000-1000-8000-00805F9B34FB"));
 
-        if (!mSocket.isConnected()) {
-            mSocket.connect();
-            //throw new Exception("No Bluetooth connected.");
+        if (mSocket == null) {
+            close();
+            throw new Exception("Socket is null");
         }
 
+        //mSocket.close();
+        mSocket.connect();
+
         if (!mSocket.isConnected()) {
-            throw new Exception("No Bluetooth connected.");
+            close();
+            throw new Exception("No Bluetooth connected");
         }
 
-        String protocol = mPreferences.getString(ConfigActivity.PROTOCOLS_LIST_KEY, "AUTO");
-        mBootQueueCommands.add((new SelectProtocolCommand(ObdProtocols.valueOf(protocol))));
+        mBootQueueCommands.add((
+                new SelectProtocolCommand(ObdProtocols.valueOf(mPreferences.getString(
+                        ConfigActivity.PROTOCOLS_LIST_KEY, "AUTO")))));
 
         for (ObdCommand cmd : mBootQueueCommands) {
             try {
                 cmd.run(mSocket.getInputStream(), mSocket.getOutputStream());
             } catch (Exception e) {
+                close();
                 throw new Exception("Failed to run command: " + cmd.getName());
             }
         }
@@ -205,12 +212,12 @@ public class ObdBluetoothService extends Service {
                 try {
                     cmd.run(mSocket.getInputStream(), mSocket.getOutputStream());
                 } catch (IOException e) {
-                    Log.d(TAG, "IOException");
-                    running = false;
+                    Log.e(TAG, "IOException");
+                    close();
                     break;
                 } catch (Exception e) {
-                    Log.d(TAG, "Exception");
-                    //e.printStackTrace();
+                    Log.e(TAG, "Failed to run command:" + cmd.getName());
+                    continue;
                 }
 
                 ((MainActivity) mContext).runOnUiThread(new Runnable() {
@@ -221,17 +228,28 @@ public class ObdBluetoothService extends Service {
                 });
             }
         }
+
+        close();
+    }
+
+    private void close() {
+        try {
+            running = false;
+
+            if (mSocket != null) {
+                mSocket.close();
+            }
+
+            mWorkerThread.interrupt();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-
-        Log.d("onDestroy", "onDestroy");
-        Log.d("onDestroy", "onDestroy");
-        Log.d("onDestroy", "onDestroy");
-
-        running = false;
+        close();
     }
 
     @Override
