@@ -32,6 +32,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.ResultReceiver;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
@@ -111,6 +112,9 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
     private static final int FUEL_LIST = 12;
     private static final int REQUEST_ENABLE_BT = 13;
     private static final int REQUEST_PERMISSIONS = 14;
+
+    private Intent intentOBD;
+    private SampleResultReceiver resultReceiever;
 
 
     public static MainActivity instance;
@@ -660,6 +664,8 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 
+        resultReceiever = new SampleResultReceiver(new Handler());
+
         instance = this;
 
         // -------------------------------------------------------------------
@@ -776,7 +782,6 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
         if (btAdapter != null && btAdapter.isEnabled() && !bluetoothDefaultIsEnable)
             btAdapter.disable();
     }
-
 
 
     /**
@@ -945,7 +950,15 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         tl.removeAllViews(); //start fresh
         //doBindService();
-        startService(new Intent(this, ObdBluetoothService.class));
+
+        String device = prefs.getString(ConfigActivity.BLUETOOTH_LIST_KEY, null);
+
+        intentOBD = new Intent(this, ObdBluetoothService.class);
+
+        intentOBD.putExtra(ObdBluetoothService.OBD_INPUT_DEVICE, device);
+        intentOBD.putExtra(ObdBluetoothService.OBD_INPUT_RECEIVER, resultReceiever);
+
+        startService(intentOBD);
 
         currentTrip = triplog.startTrip();
 
@@ -994,7 +1007,7 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
 
         endTrip();
 
-        stopService(new Intent(this, ObdBluetoothService.class));
+        stopService(intentOBD);
 
         //releaseWakeLockIfHeld();
 
@@ -1298,6 +1311,96 @@ public class MainActivity extends Activity implements ObdProgressListener, Locat
             }
             Log.d(TAG, "Done");
             return null;
+        }
+    }
+
+    private class SampleResultReceiver extends ResultReceiver {
+
+        public SampleResultReceiver(Handler handler) {
+            super(handler);
+        }
+
+        @Override
+        protected void onReceiveResult(int resultCode, Bundle resultData) {
+            switch (resultCode) {
+                case ObdBluetoothService.OBD_OUTPUT_FAILURE:
+
+                    Toast.makeText(
+                            getBaseContext(),
+                            resultData.getString(ObdBluetoothService.OBD_KEY_MESSAGE),
+                            Toast.LENGTH_LONG
+                    ).show();
+
+                    //pd.setVisibility(View.INVISIBLE);
+                    break;
+
+                case ObdBluetoothService.OBD_OUTPUT_SUCCESS:
+
+                    ObdBluetoothService.CommandSerializable
+                            Serializable = (ObdBluetoothService.CommandSerializable)
+                            resultData.getSerializable(ObdBluetoothService.OBD_KEY_COMMAND);
+
+                    assert Serializable != null;
+                    ObdCommand Command = Serializable.getObdCommand();
+
+                    //Log.d("Name", "@" + cmd.getName());
+                    //Log.d("Value", "@" + cmd.getFormattedResult());
+
+                    final String cmdName = Command.getName();
+                    final String cmdResult = Command.getFormattedResult();
+                    final String cmdID = LookUpCommand(cmdName);
+
+                    /*
+                    if (job.getState().equals(ObdCommandJob.ObdCommandJobState.EXECUTION_ERROR)) {
+                        cmdResult = job.getCommand().getResult();
+                        if (cmdResult != null && isServiceBound) {
+                            obdStatusTextView.setText(cmdResult.toLowerCase());
+                        }
+                    } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.BROKEN_PIPE)) {
+                        if (isServiceBound)
+                            stopLiveData();
+                    } else if (job.getState().equals(ObdCommandJob.ObdCommandJobState.NOT_SUPPORTED)) {
+                        cmdResult = getString(R.string.status_obd_no_support);
+                    } else {
+                        cmdResult = job.getCommand().getFormattedResult();
+                        if (isServiceBound)
+                            obdStatusTextView.setText(getString(R.string.status_obd_data));
+                    }
+                    */
+
+                    if (cmdID != null && cmdName != null && cmdResult != null) {
+                        if (!cmdID.equals("") && !cmdName.equals("") && !cmdResult.equals("")) {
+
+                            Log.e("CMD_ID", "@" + cmdID);
+                            Log.e("CMD_NAME", "@" + cmdName);
+                            Log.e("CMD_RESULT", "@" + cmdResult);
+
+                            Log.e("***************", "***************");
+
+                        /*
+                        Toast.makeText(
+                                getBaseContext(),
+                                "FUEL_LEVEL: " + ((FuelLevelCommand) job.getCommand()).getFuelLevel(),
+                                Toast.LENGTH_SHORT
+                        ).show();
+                        */
+
+                            setConsumptionParams(cmdID, Command);
+
+                            if (vv.findViewWithTag(cmdID) != null) {
+                                TextView existingTV = vv.findViewWithTag(cmdID);
+                                existingTV.setText(cmdResult);
+                            } else addTableRow(cmdID, cmdName, cmdResult);
+
+                            commandResult.put(cmdID, cmdResult);
+                            updateTripStatistic(Command, cmdID);
+                        }
+                    }
+
+                    break;
+            }
+
+            super.onReceiveResult(resultCode, resultData);
         }
     }
 }
